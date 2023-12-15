@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <br />
+    <button onclick="generatemap()">make new map</button>
+    <button onclick="precise()">precise</button>
+    <input type="text" id="accuracy" />
+    <p id="cord"></p>
+
+    <script>
+      //"use strict";
+      const canvas = document.querySelector("canvas");
+      canvas.width = 720;
+      canvas.height = 720;
+      const ctx = canvas.getContext("2d");
+      ctx.font = "bold 12px serif";
+      ctx.textAlign = "center";
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      let loopsize = 40;
+      const accuracy = document.getElementById("accuracy");
+      accuracy.value = loopsize;
+      let scl = cw / loopsize;
+
+      let map = [];
+
+      canvas.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        console.log(e);
+        if (e.which === 1) {
+          let x = e.offsetX;
+          let y = e.offsetY;
+
+          x -= x % scl;
+          y -= y % scl;
+
+          console.log(x, y);
+
+          map[x / scl][y / scl] = 1;
+
+          ctx.beginPath();
+          ctx.rect(x, y, scl, scl);
+          ctx.fill();
+          ctx.closePath();
+        } else if (e.which === 3) {
+          let x = e.offsetX;
+          let y = e.offsetY;
+
+          x -= x % scl;
+          y -= y % scl;
+
+          document.getElementById("cord").textContent = map[x / scl][y / scl];
+        } else if (e.which === 2) {
+          let x = e.offsetX;
+          let y = e.offsetY;
+
+          x -= x % scl;
+          y -= y % scl;
+          x /= scl;
+          y /= scl;
+
+          fill(x, y);
+        }
+      });
+
+      function generatemap() {
+        loopsize = parseInt(accuracy.value);
+        scl = cw / loopsize;
+        map = [];
+        ctx.clearRect(0, 0, cw, ch);
+        //generate map
+        console.log(loopsize);
+        for (let index = 0; index < loopsize; index++) {
+          const innermap = [];
+          for (let i = 0; i < loopsize; i++) {
+            let r = Math.floor(Math.random() * 3);
+
+            if (r === 0) {
+              innermap.push(1);
+            } else {
+              innermap.push(0);
+            }
+          }
+          map.push(innermap);
+        }
+        //drawmap
+        map.forEach((element, index) => {
+          element.forEach((el, i) => {
+            if (!!el) {
+              ctx.beginPath();
+              ctx.fillStyle = "black";
+              ctx.rect(i * scl, index * scl, scl, scl);
+              ctx.fill();
+              ctx.closePath();
+            } else {
+              ctx.beginPath();
+              ctx.fillStyle = "black";
+              ctx.rect(i * scl, index * scl, scl, scl);
+              ctx.stroke();
+              ctx.closePath();
+            }
+          });
+        });
+      }
+
+      function precise() {
+        for (let index = 0; index < map.length; index++) {
+          for (let i = 0; i < map[index].length; i++) {
+            let heat = 0;
+            let current = map[index][i];
+
+            //check if element is 0 cause i want to add more
+            if (!current) {
+              //check for corners
+              if (
+                i - 1 > 0 &&
+                index - 1 > 0 &&
+                i + 1 < loopsize &&
+                index + 1 < loopsize
+              ) {
+                if (!!map[index][i - 1]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i - 1]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i - 1]) {
+                  heat += 1;
+                }
+                if (heat >= 5) {
+                  map[index][i] = 1;
+                  //drawmap
+                  map.forEach((element, index) => {
+                    element.forEach((el, i) => {
+                      if (!!el) {
+                        ctx.beginPath();
+                        ctx.fillStyle = "black";
+                        ctx.rect(i * scl, index * scl, scl, scl);
+                        ctx.fill();
+                        ctx.closePath();
+                      }
+                    });
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+      let fillmap;
+      function fill(x, y) {
+        //console.log(x, y);
+        fillmap = [[x, y]];
+        let heat = 0;
+
+        let innermap = [];
+
+        for (let index = y; index < y + 20; index++) {
+          let innermap = [];
+          for (let i = x; i < x + fillmap[fillmap.length - 1].length; i++) {
+            if (!map[index][i - 1]) {
+              innermap.push([index, i - 1]);
+            }
+            if (!map[index][i + 1]) {
+              innermap.push([index, i + 1]);
+            }
+            if (!map[index - 1][i]) {
+              innermap.push([index - 1, i]);
+            }
+            if (!map[index + 1][i]) {
+              innermap.push([index + 1, i]);
+            }
+          }
+          //console.log(innermap);
+          fillmap.push(innermap);
+        }
+
+        console.log(fillmap);
+
+        //actually draw
+        fillmap.forEach((element) => {
+          element.forEach((el) => {
+            ctx.beginPath();
+            ctx.fillStyle = "black";
+            ctx.rect(el[1] * scl, el[0] * scl, scl, scl);
+            ctx.fill();
+            ctx.closePath();
+          });
+        });
+      }
+    </script>
+    <style>
+      canvas {
+        border: 3px black solid;
+      }
+    </style>
+  </body>
+</html>

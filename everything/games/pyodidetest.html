@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js"></script>
+  </head>
+  <body>
+    Pyodide test page <br />
+    Open your browser console to see Pyodide output
+    <script type="text/javascript">
+      async function main() {
+        let pyodide = await loadPyodide();
+        console.log(
+          pyodide.runPython(`
+            import sys
+            sys.version
+        `)
+        );
+        pyodide.runPython("print(1 + 2)");
+
+        await pyodide.loadPackage("micropip");
+        await pyodide.runPythonAsync(`
+  import micropip
+  await micropip.install('snowballstemmer')
+  import snowballstemmer
+  stemmer = snowballstemmer.stemmer('english')
+  print(stemmer.stemWords('go goes going gone'.split()))
+`);
+
+        pyodide.runPythonAsync(`
+        import micropip
+  await micropip.install('yt-dlp')
+        import json
+        import yt_dlp
+
+        URL = 'https://www.youtube.com/watch?v=BaW_jenozKc'
+
+        See help(yt_dlp.YoutubeDL) for a list of available options and public functions
+        ydl_opts = {}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(URL, download=False)
+
+            ydl.sanitize_info makes the info json-serializable
+            print(json.dumps(ydl.sanitize_info(info)))
+
+        `);
+      }
+      main();
+    </script>
+  </body>
+</html>

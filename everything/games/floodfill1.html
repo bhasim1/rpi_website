@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <br />
+    <button onclick="generatemap()">make new map</button>
+    <button onclick="precise()">precise</button>
+    <input type="text" id="accuracy" />
+    <button onclick="init()">init</button>
+    <h1 id="loader"></h1>
+    <script>
+      "use strict";
+      const loader = document.querySelector("#loader");
+      const canvas = document.querySelector("canvas");
+      canvas.width = 720;
+      canvas.height = 720;
+      const ctx = canvas.getContext("2d");
+      ctx.font = "bold 12px serif";
+      ctx.textAlign = "center";
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      let loopsize = 80;
+      const accuracy = document.getElementById("accuracy");
+      accuracy.value = loopsize;
+      let scl = cw / loopsize;
+
+      let map = [];
+
+      const deapthmap = [];
+
+      canvas.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        console.log(e);
+        if (e.which === 1) {
+          let x = e.offsetX;
+          let y = e.offsetY;
+
+          x -= x % scl;
+          y -= y % scl;
+
+          console.log(x, y);
+
+          map[x / scl][y / scl] = 1;
+
+          ctx.beginPath();
+          ctx.rect(x, y, scl, scl);
+          ctx.fill();
+          ctx.closePath();
+        } else if (e.which === 2) {
+          let x = e.offsetX;
+          let y = e.offsetY;
+
+          x -= x % scl;
+          y -= y % scl;
+
+          console.log(map[x / scl][y / scl]);
+        }
+      });
+
+      function generatemap() {
+        loopsize = parseInt(accuracy.value);
+        scl = cw / loopsize;
+        map = [];
+        ctx.beginPath();
+        ctx.fillStyle = "green";
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.fill();
+        ctx.closePath();
+        //generate map
+        console.log(loopsize);
+        for (let index = 0; index < loopsize; index++) {
+          const innermap = [];
+          for (let i = 0; i < loopsize; i++) {
+            let r = Math.floor(Math.random() * 3);
+
+            if (r === 0) {
+              innermap.push(1);
+            } else {
+              innermap.push(0);
+            }
+          }
+          map.push(innermap);
+        }
+        //drawmap
+        map.forEach((element, index) => {
+          element.forEach((el, i) => {
+            if (!!el) {
+              ctx.beginPath();
+              ctx.fillStyle = randomdarkcolor();
+              ctx.rect(i * scl, index * scl, scl, scl);
+              ctx.fill();
+              ctx.closePath();
+            } else {
+              ctx.beginPath();
+              ctx.fillStyle = randomdarkcolor();
+              ctx.rect(i * scl, index * scl, scl, scl);
+              ctx.stroke();
+              ctx.closePath();
+            }
+          });
+        });
+      }
+
+      function precise(repeatindex) {
+        for (let index = 0; index < map.length; index++) {
+          loader.innerHTML = "generating mountain " + repeatindex;
+          for (let i = 0; i < map[index].length; i++) {
+            let heat = 0;
+            let current = map[index][i];
+
+            //check if element is 0 cause i want to add more
+            if (!current) {
+              //check for corners
+              if (
+                i - 1 > 0 &&
+                index - 1 > 0 &&
+                i + 1 < loopsize &&
+                index + 1 < loopsize
+              ) {
+                if (!!map[index][i - 1]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i - 1]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i - 1]) {
+                  heat += 1;
+                }
+                if (heat >= 5) {
+                  map[index][i] = 1;
+                  //drawmap
+                  map.forEach((element, index) => {
+                    element.forEach((el, i) => {
+                      if (!!el) {
+                        ctx.beginPath();
+                        ctx.fillStyle = randomdarkcolor();
+                        ctx.rect(i * scl, index * scl, scl, scl);
+                        ctx.fill();
+                        ctx.closePath();
+                      }
+                    });
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      function randomdarkcolor() {
+        return `hsl(
+          ${Math.floor(Math.random() * 360 + 1)},
+          ${Math.floor(Math.random() * 10 + 1)}%,
+          ${Math.floor(Math.random() * 20 + 10)}%)`;
+      }
+
+      function randombluecolor() {
+        return `hsl(
+          ${Math.floor(Math.random() * 90 + 200)},
+          ${Math.floor(Math.random() * 20 + 60)}%,
+          ${Math.floor(Math.random() * 20 + 40)}%)`;
+      }
+      function randomsnowgen() {
+        return `hsl(
+          ${Math.floor(Math.random() * 360 + 1)},
+          ${Math.floor(Math.random() * 10 + 1)}%,
+          ${Math.floor(Math.random() * 10 + 80)}%)`;
+      }
+
+      function singletowater() {
+        //y
+        for (let index = 0; index < map.length; index++) {
+          //x
+          for (let i = 0; i < map[index].length; i++) {
+            let heat = 0;
+            let current = map[index][i];
+            if (!!current) {
+              //check for corners
+
+              if (i - 1 >= 0) {
+                if (!!map[index][i - 1]) {
+                  heat += 1;
+                }
+              }
+              if (index - 1 >= 0) {
+                if (!!map[index - 1][i]) {
+                  heat += 1;
+                }
+              }
+              if (i + 1 <= scl) {
+                if (!!map[index][i + 1]) {
+                  heat += 1;
+                }
+              }
+              if (index + 1 <= scl) {
+                if (!!map[index + 1][i]) {
+                  heat += 1;
+                }
+              }
+              console.log(i * scl, index * scl);
+              if (heat <= 0) {
+                /*   ctx.beginPath();
+                ctx.fillStyle = randombluecolor();
+                ctx.rect(
+                  i * scl - scl / 2,
+                  index * scl - scl / 2,
+                  scl + scl / 2,
+                  scl + scl / 2
+                );
+                ctx.fill();
+                ctx.closePath();*/
+                drawtree(i * scl, index * scl);
+              }
+            }
+          }
+        }
+      }
+
+      function drawtree(absolutex, absolutey) {
+        let x = Math.floor(Math.random() * 3 + 1);
+        if (x === 1) {
+          ctx.beginPath();
+          const image = new Image();
+          image.src = "./trees.png";
+          image.addEventListener("load", (e) => {
+            ctx.drawImage(
+              image,
+              0,
+              0,
+              80,
+              180,
+              absolutex - scl,
+              absolutey - scl,
+              scl * 2,
+              scl * 2
+            );
+          });
+
+          ctx.closePath();
+        } else {
+          ctx.beginPath();
+          const image = new Image();
+          image.src = "./trees.png";
+          image.addEventListener("load", (e) => {
+            ctx.drawImage(
+              image,
+              220,
+              100,
+              207,
+              170,
+              absolutex - scl * 2,
+              absolutey - scl * 2,
+              scl * 4,
+              scl * 4
+            );
+          });
+
+          ctx.closePath();
+        }
+      }
+
+      function calcdeapth(repeatindex) {
+        loader.innerHTML = "generating snow";
+        for (let index = 0; index < loopsize; index++) {
+          let inner = [];
+          for (let i = 0; i < loopsize; i++) {
+            inner.push(0);
+            console.log(loopsize);
+          }
+          console.log(inner);
+          deapthmap.push(inner);
+          inner = [];
+        }
+
+        //init
+        for (let index = 0; index < map.length; index++) {
+          for (let i = 0; i < map[index].length; i++) {
+            let innerdeapthmap = [];
+            let heat = 0;
+            let current = map[index][i];
+
+            if (!!current) {
+              //check for corners
+              if (
+                i - 1 > 0 &&
+                index - 1 > 0 &&
+                i + 1 < loopsize &&
+                index + 1 < loopsize
+              ) {
+                if (!!map[index][i - 1]) {
+                  heat += 1;
+                  deapthmap[index][i - 1] += 1;
+                }
+                if (!!map[index - 1][i - 1]) {
+                  heat += 1;
+                  deapthmap[index - 1][i - 1] += 1;
+                }
+                if (!!map[index - 1][i]) {
+                  heat += 1;
+                  deapthmap[index - 1][i] += 1;
+                }
+                if (!!map[index - 1][i + 1]) {
+                  heat += 1;
+                  deapthmap[index - 1][i + 1] += 1;
+                }
+                if (!!map[index][i + 1]) {
+                  heat += 1;
+                  deapthmap[index][i + 1] += 1;
+                }
+                if (!!map[index + 1][i + 1]) {
+                  heat += 1;
+                  deapthmap[index + 1][i + 1] += 1;
+                }
+                if (!!map[index + 1][i]) {
+                  heat += 1;
+                  deapthmap[index + 1][i] += 1;
+                }
+                if (!!map[index + 1][i - 1]) {
+                  deapthmap[index + 1][i - 1] += 1;
+                  heat += 1;
+                }
+              }
+            }
+          }
+        }
+        console.log(deapthmap);
+        //more precise
+        for (let x = 0; x < 20; x++) {
+          //precise 10 time
+          let iteration = 0;
+          //actual algorithm
+          for (let index = 0; index < deapthmap.length; index++) {
+            for (let i = 0; i < deapthmap[index].length; i++) {
+              let innerdeapthmap = [];
+              let heat = 0;
+              let current = deapthmap[index][i];
+              console.log(current, iteration);
+              if (current > iteration) {
+                //check for corners
+                if (
+                  i - 1 > 0 &&
+                  index - 1 > 0 &&
+                  i + 1 < loopsize &&
+                  index + 1 < loopsize
+                ) {
+                  if (!!map[index][i - 1]) {
+                    heat += 1;
+                    deapthmap[index][i - 1] += 1;
+                  }
+                  if (!!map[index - 1][i - 1]) {
+                    heat += 1;
+                    deapthmap[index - 1][i - 1] += 1;
+                  }
+                  if (!!map[index - 1][i]) {
+                    heat += 1;
+                    deapthmap[index - 1][i] += 1;
+                  }
+                  if (!!map[index - 1][i + 1]) {
+                    heat += 1;
+                    deapthmap[index - 1][i + 1] += 1;
+                  }
+                  if (!!map[index][i + 1]) {
+                    heat += 1;
+                    deapthmap[index][i + 1] += 1;
+                  }
+                  if (!!map[index + 1][i + 1]) {
+                    heat += 1;
+                    deapthmap[index + 1][i + 1] += 1;
+                  }
+                  if (!!map[index + 1][i]) {
+                    heat += 1;
+                    deapthmap[index + 1][i] += 1;
+                  }
+                  if (!!map[index + 1][i - 1]) {
+                    deapthmap[index + 1][i - 1] += 1;
+                    heat += 1;
+                  }
+                }
+              }
+            }
+            iteration += 2;
+          }
+          console.log(deapthmap);
+        }
+
+        //draw snow
+        deapthmap.forEach((element, index) => {
+          console.log(element);
+          element.forEach((el, i) => {
+            console.log(i, index);
+            console.log(el, 30);
+            if (el > 30) {
+              ctx.beginPath();
+              ctx.fillStyle = randomsnowgen();
+              ctx.rect(i * scl, index * scl, scl, scl);
+              ctx.fill();
+              ctx.closePath();
+            }
+          });
+        });
+      }
+
+      function init(params) {
+        //init
+        const heatmap = () => {
+          loader.innerHTML = "heatmap";
+        };
+        heatmap();
+
+        setTimeout(() => {
+          generatemap();
+        }, 20);
+
+        for (let index = 0; index < 20; index++) {
+          setTimeout(() => {
+            precise(index);
+          }, 20);
+        }
+        setTimeout(() => {
+          loader.innerHTML = "generating water";
+          singletowater();
+        }, 20);
+
+        setTimeout(() => {
+          calcdeapth();
+        }, 20);
+      }
+    </script>
+    <style>
+      canvas {
+        border: 3px black solid;
+      }
+    </style>
+  </body>
+</html>

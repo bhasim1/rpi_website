@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tictactoe</title>
+  </head>
+  <body>
+    <div id="game">
+      <canvas class="gamecanvas"></canvas>
+      <canvas class="turn"></canvas>
+      <p></p>
+    </div>
+    <p id="debug"></p>
+    <script>
+      "use strict";
+      const debug = document.getElementById("debug");
+      const paragraph = document.querySelector("p");
+      const fontsize = 4;
+
+      //normal canvas
+
+      const canvas = document.querySelector(".gamecanvas");
+      canvas.width = 720;
+      canvas.height = 720;
+
+      const ctx = canvas.getContext("2d");
+      ctx.textAlign = "center";
+      ctx.font = "bold 48px serif";
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      //turn canvas
+      const turndisplaysize = [0, 0, 200, 200];
+      const turncanvas = document.querySelector(".turn");
+      turncanvas.width = turndisplaysize[2];
+      turncanvas.height = turndisplaysize[3];
+      const turnctx = turncanvas.getContext("2d");
+
+      const posarray = [[10, 250, 490]];
+
+      const boxpos = [
+        [posarray[0][0], posarray[0][0], 220, 220, 0],
+        [posarray[0][1], posarray[0][0], 220, 220, 0],
+        [posarray[0][2], posarray[0][0], 220, 220, 0],
+        [posarray[0][0], posarray[0][1], 220, 220, 0],
+        [posarray[0][1], posarray[0][1], 220, 220, 0],
+        [posarray[0][2], posarray[0][1], 220, 220, 0],
+        [posarray[0][0], posarray[0][2], 220, 220, 0],
+        [posarray[0][1], posarray[0][2], 220, 220, 0],
+        [posarray[0][2], posarray[0][2], 220, 220, 0],
+      ];
+      const winable = [
+        //horizontal
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        //vertical
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 4, 8],
+        //kreuz
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      const stringwinable = [
+        //horizontal
+        "[0, 1, 2]",
+        "[3, 4, 5]",
+        "[6, 7, 8]",
+        //vertical
+        "[0, 3, 6]",
+        "[1, 4, 7]",
+        "[2, 4, 8]",
+        //kreuz
+        "[0, 4, 8]",
+        "[2, 4, 6]",
+      ];
+
+      let xwin = [[], [], [], [], [], [], [], []];
+      let owin = [[], [], [], [], [], [], [], []];
+
+      let xmove = [];
+      let omove = [];
+
+      let movable = true;
+
+      let type = 1;
+
+      let placed = 0;
+
+      let nextclickreset = false;
+
+      class game {
+        drawbox() {
+          ctx.beginPath();
+          ctx.fillStyle = "black";
+          ctx.strokeStyle = "black";
+          boxpos.forEach((element) => {
+            ctx.rect(element[0], element[1], element[2], element[3]);
+          });
+          ctx.lineWidth = 5;
+          ctx.stroke();
+          ctx.closePath();
+          this.displayturn(type);
+        }
+
+        userinput(e) {
+          console.log(e);
+          if (nextclickreset) {
+            this.reset();
+          } else {
+            this.userx = e.offsetX;
+            this.usery = e.offsetY;
+            boxpos.forEach((element) => {
+              if (
+                e.offsetX < element[0] + element[2] &&
+                e.offsetX > element[0] &&
+                e.offsetY < element[1] + element[3] &&
+                e.offsetY > element[1]
+              ) {
+                if (movable) {
+                  this.mark(element);
+                  console.log(element);
+                }
+              }
+            });
+          }
+        }
+
+        mark(pos) {
+          if (pos[4] === 0) {
+            if (type === 0) {
+              omove.push(pos);
+              ctx.beginPath();
+              ctx.strokeStyle = "yellow";
+              ctx.moveTo(pos[0] + pos[2], pos[1] + pos[3] / 2);
+              ctx.arc(
+                pos[0] + pos[2] / 2,
+                pos[1] + pos[3] / 2,
+                pos[2] / 2,
+                0,
+                Math.PI * 2
+              );
+              ctx.closePath();
+              pos[4]++;
+            } else {
+              xmove.push(pos);
+              ctx.beginPath();
+              ctx.strokeStyle = "green";
+              ctx.moveTo(pos[0], pos[1]);
+              ctx.lineTo(pos[0] + pos[2], pos[1] + pos[3]);
+              ctx.moveTo(pos[0], pos[1] + pos[3]);
+              ctx.lineTo(pos[0] + pos[2], pos[1]);
+              ctx.closePath();
+              pos[4]++;
+            }
+            ctx.stroke();
+            this.drawbox();
+            placed++;
+            if (type === 0) {
+              type++;
+            } else if (type === 1) {
+              type--;
+            }
+            this.displayturn(type);
+            this.checkwin(boxpos.indexOf(pos), type);
+          }
+        }
+
+        checkwin(index, type) {
+          //erst o
+          if (type === 1) {
+            for (let i = 0; i < winable.length; i++) {
+              const element = winable[i];
+              element.forEach((el, ind) => {
+                if (el === index) {
+                  owin[i][ind] = el;
+                }
+              });
+            }
+
+            //checkwin
+            owin.forEach((element, index) => {
+              let eles = JSON.stringify(element);
+              winable.forEach((el, ind) => {
+                let els = JSON.stringify(el);
+                //console.log(els, eles);
+                if (els === eles) {
+                  this.winscreen(index, type);
+                }
+              });
+            });
+          }
+          //dann x
+          else {
+            for (let i = 0; i < winable.length; i++) {
+              const element = winable[i];
+              element.forEach((el, ind) => {
+                if (el === index) {
+                  xwin[i][ind] = el;
+                }
+              });
+            }
+          }
+
+          //checkwin
+          xwin.forEach((element, index) => {
+            let eles = JSON.stringify(element);
+            winable.forEach((el, ind) => {
+              let els = JSON.stringify(el);
+              if (els === eles) {
+                this.winscreen(index, type);
+              }
+            });
+          });
+          if (placed === 9) {
+            this.winscreen(-1, type);
+          }
+        }
+
+        winscreen(index, type) {
+          let winner = "";
+          if (index > 0) {
+            ctx.beginPath();
+            let start = boxpos[winable[index][0]];
+            let end = boxpos[winable[index][2]];
+            ctx.strokeStyle = "rgb(255,100,20)";
+            ctx.lineWidth = 15;
+            ctx.lineCap = "round";
+            ctx.moveTo(start[0] + start[2] / 2, start[1] + start[3] / 2);
+            ctx.lineTo(end[0] + end[2] / 2, end[1] + end[3] / 2);
+            ctx.stroke();
+            ctx.closePath();
+
+            if (type === 0) {
+              type++;
+            } else if (type === 1) {
+              type--;
+            }
+
+            if (type === 0) {
+              winner = "circle";
+            } else {
+              winner = "cross";
+            }
+          } else if (index === -1) {
+            winner = "noone";
+          }
+          //display win
+          this.displaywin(winner);
+        }
+
+        displayturn(type) {
+          turnctx.beginPath();
+          turnctx.clearRect(
+            turndisplaysize[0],
+            turndisplaysize[1],
+            turndisplaysize[2],
+            turndisplaysize[3]
+          );
+          if (type === 0) {
+            turnctx.beginPath();
+            turnctx.lineWidth = 10;
+            turnctx.strokeStyle = "yellow";
+            turnctx.moveTo(
+              turndisplaysize[0] + turndisplaysize[2],
+              turndisplaysize[1] + turndisplaysize[3] / 2
+            );
+            turnctx.arc(
+              turndisplaysize[0] + turndisplaysize[2] / 2,
+              turndisplaysize[1] + turndisplaysize[3] / 2,
+              turndisplaysize[2] / 2,
+              0,
+              Math.PI * 2
+            );
+            turnctx.closePath();
+          } else {
+            turnctx.beginPath();
+            turnctx.lineWidth = 10;
+            turnctx.strokeStyle = "green";
+            turnctx.moveTo(turndisplaysize[0], turndisplaysize[1]);
+            turnctx.lineTo(
+              turndisplaysize[0] + turndisplaysize[2],
+              turndisplaysize[1] + turndisplaysize[3]
+            );
+            turnctx.moveTo(
+              turndisplaysize[0],
+              turndisplaysize[1] + turndisplaysize[3]
+            );
+            turnctx.lineTo(
+              turndisplaysize[0] + turndisplaysize[2],
+              turndisplaysize[1]
+            );
+            turnctx.closePath();
+          }
+          turnctx.stroke();
+          turnctx.closePath();
+        }
+
+        displaywin(winner) {
+          ctx.beginPath();
+          ctx.fillStyle = "red";
+          ctx.fillText(winner + " won!", cw / 2, ch / 2);
+          ctx.fillText("Click HERE to reset", cw / 2, ch / 2 + 60);
+          ctx.fill();
+          ctx.closePath();
+          nextclickreset = true;
+        }
+
+        reset() {
+          //reset
+          nextclickreset = false;
+          xwin = [[], [], [], [], [], [], [], []];
+          owin = [[], [], [], [], [], [], [], []];
+          movable = true;
+          placed = 0;
+          type = 1;
+
+          for (let index = 0; index < boxpos.length; index++) {
+            boxpos[index][4] = 0;
+          }
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          this.drawbox();
+        }
+      }
+
+      const initgame = new game();
+      initgame.drawbox();
+
+      canvas.addEventListener("click", (e) => {
+        calluserinput(e);
+      });
+
+      function calluserinput(e) {
+        initgame.userinput(e);
+      }
+
+      function callreset() {
+        initgame.reset();
+      }
+    </script>
+    <style>
+      canvas {
+        border: 3px black solid;
+        border-radius: 5px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .turn {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+      }
+    </style>
+  </body>
+</html>

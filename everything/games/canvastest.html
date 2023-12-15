@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+</head>
+<style>
+    *{
+            box-sizing: border-box;
+    }
+    body {
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+    }
+    canvas {
+            border: 3px solid black;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+            background-color: rgb(199, 199, 199);
+    }
+</style>
+<body onload="dplay()">
+    <canvas></canvas>
+</body>
+<script defer>
+
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width  = window.innerWidth - 200///4;
+    ctx.canvas.height = window.innerHeight - 200//-100;
+    var night = false
+    var cw = canvas.width
+    var ch = canvas.height
+    var hour = new Date().getHours()
+    if(hour > 22 || hour < 7){night = true}
+
+    var radius = 180
+    var radiusout = 600
+    const middle = cw/2
+    const degree = Math.PI/12
+    hour = 1
+    function dplay(){
+    ctx.beginPath()
+    ctx.lineWidth = 10
+    ctx.arc(middle,ch, radiusout, Math.PI * 2, false)
+    ctx.stroke()
+    ctx.moveTo(cw/2, ch)
+    ctx.rotate(hour * degree)
+    ctx.lineTo(radiusout, radiusout)
+  //  ctx.rotate(-(hour * degree))
+  ctx.setTransform(1,0,0,1,0,0)
+    ctx.stroke()
+    ctx.moveTo(cw/2, ch)
+    ctx.lineTo(cw / 2, ch - radiusout)
+    ctx.stroke()
+    ctx.closePath()
+    }
+    dplay()
+ 
+
+</script>
+</html>

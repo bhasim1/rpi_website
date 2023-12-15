@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="reset" onclick="g.reset();" style="display: none">RESET</button>
+    <div class="settings">
+      <label for="difficulty">difficulty</label>
+      <input type="text" id="difficulty" name="difficulty" value="1" />
+      <!--<label for="size">size</label>
+      <input type="text" id="size" name="size" value="100" />-->
+      <button id="retry" onclick="g.init()">START</button>
+    </div>
+    <div class="ingame" style="display: none">
+      <canvas></canvas>
+      <p id="countdown"></p>
+      <div class="center" style="display: none">
+        <button id="retry" onclick="g.retry()">RETRY</button>
+      </div>
+    </div>
+    <script>
+      const canvas = document.querySelector("canvas");
+
+      canvas.height = window.innerHeight / 1.2;
+      canvas.width = canvas.height;
+      let inputdif = 1;
+
+      let ctx;
+
+      const color = [
+        "blue",
+        "green",
+        "red",
+        "purple",
+        "redbrown",
+        "bluegreen",
+        "black",
+        "grey",
+      ];
+
+      class game {
+        init() {
+          //basicly resetes
+          /*let s =
+            parseInt(document.querySelector("#size").value) > 0
+              ? parseInt(document.querySelector("#size").value) * 10
+              : window.innerHeight;*/
+          let s = window.innerHeight;
+          this.p = document.getElementById("countdown");
+          this.p.innerText = 0;
+          canvas.height = s / 1.2;
+          canvas.width = canvas.height;
+          this.fail = false;
+          this.win = false;
+          this.flags = [];
+          this.flagscount = 0;
+          this.flagsstringarr = [];
+          this.resetbtn = document.getElementById("reset");
+          this.difficulty = parseInt(document.querySelector("#difficulty").value);
+          this.bombcount = 10 * this.difficulty;
+          this.bombs = [];
+          this.map = [];
+          this.cover = [];
+          this.deleteat = 0;
+          this.gridsize = this.difficulty*this.difficulty * 10;
+          this.scl = canvas.width / this.gridsize;
+          this.ctx = canvas.getContext("2d");
+          ctx = this.ctx;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          this.moved = false;
+          this.makemaps();
+          this.drawgrid();
+          canvas.addEventListener("mousedown", (e) => {
+            if (e.buttons === 1) {
+              let x = (e.offsetX - (e.offsetX % this.scl)) / this.scl;
+              let y = (e.offsetY - (e.offsetY % this.scl)) / this.scl;
+              if (this.win === true || this.fail === true) {
+                this.reset();
+              } else if (this.moved === false) {
+                this.timer();
+
+                this.moved = true;
+                this.makebombs(x, y);
+                this.makenums();
+                this.reveal(y, x);
+              }
+              this.reveal(y, x);
+            } else if (e.buttons === 2) {
+              let x = Math.round(
+                (e.offsetX - (e.offsetX % this.scl)) / this.scl
+              );
+              let y = Math.round(
+                (e.offsetY - (e.offsetY % this.scl)) / this.scl
+              );
+              this.spawnflag(x, y);
+            } else if (e.buttons === 4) {
+              /*  let x = Math.round(
+                (e.offsetX - (e.offsetX % this.scl)) / this.scl
+              );
+              let y = Math.round(
+                (e.offsetY - (e.offsetY % this.scl)) / this.scl
+              );
+              this.deleteflag(x, y);*/
+            }
+          });
+          canvas.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+          });
+          document.querySelector(".ingame").style.display = "";
+          document.querySelector(".settings").style.display = "none";
+        }
+
+        reset() {
+          location.reload();
+        }
+
+        makemaps() {
+          this.map = [];
+          for (let index = 0; index < this.gridsize; index += 1) {
+            let innermap = [];
+            for (let index = 0; index < this.gridsize; index += 1) {
+              innermap.push(0);
+            }
+            this.map.push(innermap);
+          }
+
+          this.cover = [];
+          for (let index = 0; index < this.gridsize; index += 1) {
+            let innercover = [];
+            for (let index = 0; index < this.gridsize; index += 1) {
+              innercover.push(1);
+            }
+            this.cover.push(innercover);
+          }
+        }
+
+        makebombs(x, y) {
+          x = Math.round(x);
+          y = Math.round(y);
+          console.log(x, y);
+          //x,y === where not to set
+          let i = 0;
+          while (this.bombcount > i) {
+            console.log(this.bombcount);
+            this.size = 3;
+            let size = this.size;
+            let xr = Math.floor(Math.random() * this.gridsize);
+            let yr = Math.floor(Math.random() * this.gridsize);
+            if (
+              xr - size < x &&
+              xr + size > x &&
+              yr - size < y &&
+              yr + size > y
+            ) {
+              this.map[yr][xr] = 0;
+            } else {
+              this.bombs.push([yr, xr]);
+              this.map[yr][xr] = "x";
+              i++;
+            }
+          }
+        }
+
+        makenums() {
+          //y
+          for (let i = 0; i < this.gridsize; i += 1) {
+            //x
+            for (let index = 0; index < this.gridsize; index += 1) {
+              if (this.map[i][index] === "x") {
+                if (i - 1 > -1 && index + 1 != this.gridsize) {
+                  if (this.map[i - 1][index + 1] != "x") {
+                    this.map[i - 1][index + 1] += 1;
+                  }
+                }
+                if (i - 1 > -1) {
+                  if (this.map[i - 1][index] != "x") {
+                    this.map[i - 1][index] += 1;
+                  }
+                }
+                if (i - 1 > -1 && index - 1 > -1) {
+                  if (this.map[i - 1][index - 1] != "x") {
+                    this.map[i - 1][index - 1] += 1;
+                  }
+                }
+                if (index - 1 > -1) {
+                  if (this.map[i][index - 1] != "x") {
+                    this.map[i][index - 1] += 1;
+                  }
+                }
+                if (index - 1 > -1 && i + 1 != this.gridsize) {
+                  if (this.map[i + 1][index - 1] != "x") {
+                    this.map[i + 1][index - 1] += 1;
+                  }
+                }
+
+                if (i + 1 != this.gridsize) {
+                  if (this.map[i + 1][index] != "x") {
+                    this.map[i + 1][index] += 1;
+                  }
+                }
+                if (index + 1 != this.gridsize && i + 1 != this.gridsize) {
+                  if (this.map[i + 1][index + 1] != "x") {
+                    this.map[i + 1][index + 1] += 1;
+                  }
+                }
+                if (index + 1 != this.gridsize) {
+                  if (this.map[i][index + 1] != "x") {
+                    this.map[i][index + 1] += 1;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        reveal(i, index) {
+          i = Math.round(i);
+          index = Math.round(index);
+
+          if (this.map[i][index] === "x") {
+            this.fail = true;
+            this.displaylose();
+          } else if (this.map[i][index] > 0) {
+            this.cover[i][index] = 0;
+            console.log("0");
+            this.drawallrevealed();
+          } else {
+            this.cover[i][index] = 0;
+            if (i - 1 > -1 && index + 1 != this.gridsize) {
+              if (
+                this.map[i - 1][index + 1] === 0 &&
+                this.cover[i - 1][index + 1] === 1
+              ) {
+                this.reveal(i - 1, index + 1);
+              }
+              if (
+                this.map[i - 1][index + 1] > 0 &&
+                this.cover[i - 1][index + 1] === 1
+              ) {
+                this.cover[i - 1][index + 1] = 0;
+              }
+            }
+            if (i - 1 > -1) {
+              if (
+                this.map[i - 1][index] === 0 &&
+                this.cover[i - 1][index] === 1
+              ) {
+                this.reveal(i - 1, index);
+              }
+              if (
+                this.map[i - 1][index] > 0 &&
+                this.cover[i - 1][index] === 1
+              ) {
+                this.cover[i - 1][index] = 0;
+              }
+            }
+            if (i - 1 > -1 && index - 1 > -1) {
+              if (
+                this.map[i - 1][index - 1] === 0 &&
+                this.cover[i - 1][index - 1] === 1
+              ) {
+                this.reveal(i - 1, index - 1);
+              }
+              if (
+                this.map[i - 1][index - 1] > 0 &&
+                this.cover[i - 1][index - 1] === 1
+              ) {
+                this.cover[i - 1][index - 1] = 0;
+              }
+            }
+            if (index - 1 > -1) {
+              if (
+                this.map[i][index - 1] === 0 &&
+                this.cover[i][index - 1] === 1
+              ) {
+                this.reveal(i, index - 1);
+              }
+              if (
+                this.map[i][index - 1] > 0 &&
+                this.cover[i][index - 1] === 1
+              ) {
+                this.cover[i][index - 1] = 0;
+              }
+            }
+            if (index - 1 > -1 && i + 1 != this.gridsize) {
+              if (
+                this.map[i + 1][index - 1] === 0 &&
+                this.cover[i + 1][index - 1] === 1
+              ) {
+                this.reveal(i + 1, index - 1);
+              }
+              if (
+                this.map[i + 1][index - 1] > 0 &&
+                this.cover[i + 1][index - 1] === 1
+              ) {
+                this.cover[i + 1][index - 1] = 0;
+              }
+            }
+
+            if (i + 1 != this.gridsize) {
+              if (
+                this.map[i + 1][index] === 0 &&
+                this.cover[i + 1][index] === 1
+              ) {
+                this.reveal(i + 1, index);
+              }
+              if (
+                this.map[i + 1][index] > 0 &&
+                this.cover[i + 1][index] === 1
+              ) {
+                this.cover[i + 1][index] = 0;
+              }
+            }
+            if (index + 1 != this.gridsize && i + 1 != this.gridsize) {
+              if (
+                this.map[i + 1][index + 1] === 0 &&
+                this.cover[i + 1][index + 1] === 1
+              ) {
+                this.reveal(i + 1, index + 1);
+              }
+              if (
+                this.map[i + 1][index + 1] > 0 &&
+                this.cover[i + 1][index + 1] === 1
+              ) {
+                this.cover[i + 1][index + 1] = 0;
+              }
+            }
+            if (index + 1 != this.gridsize) {
+              if (
+                this.map[i][index + 1] === 0 &&
+                this.cover[i][index + 1] === 1
+              ) {
+                this.reveal(i, index + 1);
+              }
+              if (
+                this.map[i][index + 1] > 0 &&
+                this.cover[i][index + 1] === 1
+              ) {
+                this.cover[i][index + 1] = 0;
+              }
+            }
+            this.drawallrevealed();
+          }
+
+          this.checkwin();
+        }
+
+        drawgrid() {
+          ctx.beginPath();
+          ctx.fillStyle = "black";
+          ctx.lineWidth = 1;
+          for (let i = 0; i < this.gridsize; i += 1) {
+            for (let index = 0; index < this.gridsize; index += 1) {
+              ctx.rect(index * this.scl, i * this.scl, this.scl, this.scl);
+            }
+          }
+          ctx.stroke();
+          ctx.closePath();
+        }
+
+        drawnum(index, i, v) {
+          i = Math.round(i);
+          index = Math.round(index);
+
+          this.drawbox(index, i);
+          ctx.beginPath();
+
+          ctx.fillStyle = color[v - 1];
+
+          ctx.font = this.scl + "px Arial";
+          ctx.fillText(
+            v,
+            index * this.scl + this.scl / 4,
+            i * this.scl + this.scl - this.scl / 8
+          );
+
+          ctx.closePath();
+          this.drawgrid();
+        }
+
+        drawbox(index, i) {
+          i = Math.round(i);
+          index = Math.round(index);
+
+          ctx.beginPath();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "grey";
+
+          ctx.fillRect(index * this.scl, i * this.scl, this.scl, this.scl);
+
+          ctx.closePath();
+          this.drawgrid();
+        }
+
+        drawbomb(index, i) {
+          i = Math.round(i);
+          index = Math.round(index);
+
+          ctx.beginPath();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "red";
+          ctx.arc(
+            index * this.scl + this.scl / 2,
+            i * this.scl + this.scl / 2,
+            this.scl / 3,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+          ctx.closePath();
+          this.drawgrid();
+        }
+
+        drawflags() {
+          for (let index = 0; index < this.flags.length; index++) {
+            if (
+              typeof this.flags[index] !== "undefined" &&
+              this.flags[index][2]
+            ) {
+              const element = this.flags[index];
+              ctx.beginPath();
+              ctx.lineWidth = 10;
+              ctx.fillStyle = "red";
+              ctx.moveTo(element[0] + this.scl / 2, element[1]);
+              ctx.lineTo(element[0] + this.scl / 2, element[1] + this.scl);
+              ctx.stroke();
+              ctx.closePath();
+            }
+          }
+        }
+
+        drawallrevealed() {
+          for (let i = 0; i < this.cover.length; i += 1) {
+            for (let index = 0; index < this.cover[i].length; index += 1) {
+              if (this.cover[i][index] === 0) {
+                switch (this.map[i][index]) {
+                  case 1:
+                    this.drawnum(index, i, 1);
+                    break;
+                  case 2:
+                    this.drawnum(index, i, 2);
+                    break;
+                  case 3:
+                    this.drawnum(index, i, 3);
+                    break;
+                  case 4:
+                    this.drawnum(index, i, 4);
+                    break;
+                  case 5:
+                    this.drawnum(index, i, 5);
+                    break;
+                  case 6:
+                    this.drawnum(index, i, 6);
+                    break;
+                  case 7:
+                    this.drawnum(index, i, 7);
+                    break;
+                  case 8:
+                    this.drawnum(index, i, 8);
+                    break;
+                  case "x":
+                    this.drawbomb(index, i);
+                    break;
+
+                  default:
+                    this.drawbox(index, i);
+                    break;
+                }
+              }
+            }
+          }
+        }
+
+        removecover() {
+          this.cover = [];
+          for (let index = 0; index < this.gridsize; index += 1) {
+            let innercover = [];
+            for (let index = 0; index < this.gridsize; index += 1) {
+              innercover.push(0);
+            }
+            this.cover.push(innercover);
+          }
+          this.drawallrevealed();
+        }
+
+        checkwin() {
+          let x = 0;
+          for (let index = 0; index < this.gridsize; index += 1) {
+            for (let i = 0; i < this.gridsize; i += 1) {
+              if (this.cover[index][i] === 1) {
+                x += 1;
+              }
+            }
+          }
+          if (x === this.bombcount) {
+            this.win = true;
+            this.displaywin();
+          }
+        }
+
+        timer() {
+          setTimeout(() => {
+            if (
+              this.win === false &&
+              this.fail === false &&
+              document.querySelector(".settings").style.display === "none"
+            ) {
+              this.p.innerText = parseInt(this.p.innerText) + 1;
+              this.timer();
+            }
+          }, 1000);
+        }
+
+        displaywin() {
+          ctx.beginPath();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "red";
+          ctx.textalign = "center";
+          ctx.font = this.scl * 5 + "px Arial";
+          ctx.fillText("win", this.scl * 1, this.scl * 5);
+
+          ctx.closePath();
+        }
+
+        displaylose() {
+          this.removecover();
+          ctx.beginPath();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "red";
+          ctx.textalign = "center";
+          ctx.font = this.scl * 5 + "px Arial";
+          ctx.fillText("lose", this.scl * 1, this.scl * 5);
+
+          ctx.closePath();
+          this.resetbtn.style.display = "";
+          console.log("displaylose");
+        }
+
+        spawnflag(x, y) {
+          this.flagscount++;
+          x = Math.round(Math.round(x));
+          y = Math.round(Math.round(y));
+
+          this.flags.push([x * this.scl, y * this.scl, true]);
+          this.flagsstringarr.push(
+            JSON.stringify([x * this.scl, y * this.scl, true])
+          );
+          this.drawallrevealed()
+          this.drawflags();
+
+        }
+      }
+
+      const g = new game();
+    </script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background-color: rgb(4, 4, 4);
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      canvas {
+        background-color: rgb(82, 82, 82);
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border: 5px rgb(180, 254, 104) solid;
+        border-radius: 5px;
+        cursor: crosshair;
+      }
+      #retry,
+      input,
+      #reset,
+      label,
+      #countdown {
+        max-width: 10ch;
+        min-width: 10ch;
+        background-color: rgb(30, 30, 30);
+        color: white;
+        font-size: 2rem;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin: 1rem;
+        border: 5px rgb(180, 254, 104) solid;
+        border-radius: 5px;
+      }
+      label,
+      input {
+        width: fit-content;
+      }
+      button {
+        cursor: pointer;
+      }
+      .center,
+      .settings {
+        grid-template-columns: auto;
+        grid-template-rows: 80px 100px;
+        display: grid;
+        gap: 10px 20px;
+        justify-content: center;
+        align-content: center;
+        height: 100vh;
+        width: 100vw;
+      }
+      .settings * {
+        display: block;
+      }
+      #retry {
+        position: relative;
+      }
+    </style>
+  </body>
+</html>

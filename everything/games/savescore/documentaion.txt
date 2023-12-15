@@ -1,0 +1,6 @@
+post request to save.php to insert new data in format: 
+    -submit button with name !submit!
+    -textinput with name !username!
+    -textinput with name !score! idealy user never sees it
+
+get request to getall.php to get all values as array

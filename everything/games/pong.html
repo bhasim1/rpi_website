@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>pong</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<style>
+    *{
+            box-sizing: border-box;
+    }
+    body {
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+    }
+    canvas {
+            border: 3px solid rgb(255, 255, 255);
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 0px;
+           /* margin-top: 50px;*/
+    }
+    .divcontent{
+        width: 25vw;
+        border: 3px solid red;
+        border-radius: 10px;
+        position: absolute;
+        top: 55vh;
+        transform: translateY(-50vh);
+        color: black;
+        display: block;
+        margin-left: calc(75vw/2);
+        margin-right: calc(75vw/2);
+    }
+    #greyout{
+        position: absolute;
+        top: 0;
+        width: 100vw;
+        height: 100vw;
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    #score{
+        position: absolute;
+        top:0;
+        right: 0;
+        margin: 20px 20px 20px 20px;
+        font-size: 1.5rem;
+    }
+</style>
+<body>
+    <canvas></canvas>
+    <div id="greyout"></div>
+    <div class="divcontent">
+        <h1>tooltip</h1>
+        <p>W & S for green</p>
+        <p>arrowkeys for red</p>
+        <p>space to start</p>
+        <p>i for tooltip obviouse</p>
+    </div>
+    <p id="score"></p>
+</body>
+<script defer>
+    const canvas = document.querySelector("canvas");
+    const tooltipdiv = document.querySelector("div");
+    $(".divcontent").hide()
+    $("#greyout").hide()
+    $("#score").hide()
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width  = window.innerWidth - 6///4;
+    ctx.canvas.height = window.innerHeight - 6//-100;
+        var px1 = 25
+        var py1 = canvas.height/2 - 150
+        var px2 = 50
+        var py2 = py1 + canvas.height/4
+
+        var qx1 = canvas.width - 50
+        var qy1 = canvas.height/2 - 150
+        var qx2 = canvas.width - 25
+        var qy2 = qy1 + canvas.height/4
+
+
+        var bx1 = canvas.width/2
+        var by1 = canvas.height/2
+
+        var radius = 30;
+
+        var con = true
+        var d = false
+        var friction = 1.0005
+        var rainbowcolor = Math.floor(Math.random() * 255)
+        var bvx = Math.floor(Math.random()* 20 - 10 );
+        var bvy = Math.floor(Math.random()* 20 - 10 );
+
+        var keyw = false
+        var keys = false
+
+        var keyau = false
+        var keyad = false
+
+        var keyplay = false
+        var tooltip = false
+
+        var lost
+        var score = 0
+
+    document.onkeydown = checkkeydown;
+    document.onkeyup = checkkeyup;
+
+    function checkkeydown(e){
+    e.preventDefault();
+    if (e.keyCode == '38') {
+    keyad = true
+    }
+    else if (e.keyCode == '40') {
+    keyau = true
+    }
+    else if (e.keyCode == '83') {
+    keyw = true
+    }
+    else if (e.keyCode == '87') {
+    keys = true
+    } else if (e.keyCode == '32' && lost === "") {
+    keyplay = true
+    trackscore()
+    $("#score").show()
+    } else if (e.keyCode == '32' && lost !== "") {
+    keyplay = true
+    bvx = Math.floor(Math.random()* 20 - 10 );
+    bvy = Math.floor(Math.random()* 20 - 10 );
+    score = 0
+    trackscore()
+    $("#score").show()
+    } else if (e.keyCode == '84') {
+    tooltip = true
+    $(".divcontent").toggle()
+    $("#greyout").toggle()
+    }
+    console.log(keys, keyw)
+    }
+
+    function checkkeyup(e){
+    e.preventDefault();
+    if (e.keyCode == '38') {
+    keyad = false
+    }
+    else if (e.keyCode == '40') {
+    keyau = false
+    }
+    else if (e.keyCode == '83') {
+    keyw = false
+    }
+    else if (e.keyCode == '87') {
+    keys = false
+    }
+    console.log(keys, keyw)
+    }
+       
+
+
+
+function animate(){
+    requestAnimationFrame(animate); 
+    ctx.beginPath()
+    ctx.fillStyle = `hsla(${rainbowcolor} , 50%, 50%, 0.3)`;
+    ctx.fillRect(0,0,canvas.width,canvas.height)
+    ctx.fill()
+    ctx.beginPath()
+    ctx.strokeStyle = "green"
+    ctx.fillStyle = "green"
+    ctx.moveTo(px1, py1)
+    ctx.lineTo(px1, py2)
+    ctx.lineTo(px2, py2)
+    ctx.lineTo(px2, py1)
+    ctx.lineTo(px1, py1)
+    ctx.closePath()
+    ctx.fill()
+    ctx.beginPath()
+    ctx.strokeStyle = "red"
+    ctx.fillStyle = "red"
+    ctx.moveTo(qx1, qy1)
+    ctx.lineTo(qx1, qy2)
+    ctx.lineTo(qx2, qy2)
+    ctx.lineTo(qx2, qy1)
+    ctx.lineTo(qx1, qy1)
+    ctx.closePath()
+    ctx.fill()
+    rainbowcolor++
+    //win lose
+    if(bx1 > canvas.width){
+        lost = "red"
+        end()
+        bx1 = canvas.width/2
+        by1 = canvas.height/2
+        bvx = 0
+        bvy = 0
+        $("#score").hide()
+        audio()
+    }
+    if(bx1 < 0){
+        lost = "green"
+        end()
+        bx1 = canvas.width/2
+        by1 = canvas.height/2
+        bvx = 0
+        bvy = 0
+        $("#score").hide()
+        audio()
+    }
+    //collision
+    if(by1 + radius > canvas.height || by1 - radius < 0){
+        bvy = -bvy;
+        audioplay()
+    }
+    //green col
+    if(bx1 + radius >= px1 && bx1 <= px1 + 50 && by1 + radius >= py1 && by1 <= py1 + 300 ){
+        bvx = -bvx
+        audioplay()
+    }
+    //red col
+    if(bx1 + radius >= qx1 && bx1 <= qx1 + 50 && by1 + radius >= qy1 && by1 <= qy1 + 300 ){
+        bvx = -bvx
+        audioplay()
+    }
+    //green
+    if(keyau === true){
+
+    qy1 +=24
+    } else  if(keyad === true){
+
+    qy1 -=24
+    }
+    //red
+    if(keyw === true){
+
+    py1 +=24
+    } else  if(keys === true){
+
+    py1 -=24
+    }
+    py2 = py1 + canvas.height/4
+    qy2 = qy1 + canvas.height/4
+if(keyplay === true){
+    bx1 += bvx
+    by1 += bvy
+}
+    bvx *= friction
+    bvy *= friction
+    draw();
+}
+animate()
+function draw(){
+    ctx.beginPath()
+    ctx.fillStyle = "black"
+    ctx.arc(bx1, by1, radius, Math.PI * 2, false)
+    ctx.fill()
+}
+function end(){
+    alert(`${lost} lost`)
+    console.log(lost)
+}
+function trackscore(){
+    score++
+    $("#score").text(`Score: ${score}`)
+    setTimeout(trackscore, 10)
+}
+
+var audio = new Audio('./_8-bit_lazer6.mp3');
+function audioplay(){
+    audio.play();
+}
+</script>
+</html>

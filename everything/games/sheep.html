@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sheep</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        text-align: center;
+        overflow: hidden;
+      }
+      canvas {
+        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script defer>
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.canvas.width = window.innerWidth;
+      ctx.canvas.height = window.innerHeight;
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const scl = 32;
+
+      const cwscl = cw / scl;
+      const chscl = ch / scl;
+
+      let finished = 0;
+
+      const bgimage = new Image();
+      bgimage.src = "background.png";
+      bgimage.onload = finished++;
+
+      const sheepimage = new Image();
+      sheepimage.src = "sheep.png";
+      sheepimage.onload = finished++;
+
+      const elements = {
+        tree: [[200, 8, 450, 350]],
+        water: [[1120, 150, 700, 703]],
+        mountain: [],
+      };
+
+      const sheep = [];
+      for (let index = 0; index < 4; index++) {
+        sheep.push([
+          cw / 2 - 400 + Math.floor(Math.random() * 400 + 1),
+          ch / 2 - 200 + Math.floor(Math.random() * 400 + 1),
+          Math.floor(Math.random() * 2),
+          0,
+          [
+            new Audio(
+              "./Splash Sound Effects - Small and Big Water Splash Sounds - Water Droplet Sounds - Water Sounds-m8TlzCemyvI.mp3"
+            ),
+            0,
+          ],
+          "idel",
+        ]);
+      }
+
+      window.addEventListener("mousedown", (e) => {
+        for (let index = 0; index < sheep.length; index++) {
+          const elementsheep = sheep[index];
+          if (
+            elementsheep[2] === 1 &&
+            elementsheep[0] < e.offsetX &&
+            elementsheep[0] + sheepimage.width > e.offsetX &&
+            elementsheep[1] < e.offsetY &&
+            elementsheep[1] + sheepimage.height > e.offsetY
+          ) {
+            // console.log("col");
+            elementsheep[3] = 1;
+          } else if (
+            elementsheep[2] === 0 &&
+            elementsheep[0] - sheepimage.width * 2 < e.offsetX &&
+            elementsheep[0] - sheepimage.width > e.offsetX &&
+            elementsheep[1] < e.offsetY &&
+            elementsheep[1] + sheepimage.height > e.offsetY
+          ) {
+            // console.log("col");
+            elementsheep[3] = 1;
+
+          }
+        }
+        console.log(e.offsetX, e.offsetX);
+      });
+
+      window.addEventListener("mouseup", (e) => {
+        // console.log(e.offsetX, e.offsetY);
+        for (let index = 0; index < sheep.length; index++) {
+          const elementsheep = sheep[index];
+          if (!!elementsheep[3] && !!elementsheep[2]) {
+            elementsheep[3] = 0;
+            elementsheep[0] = e.offsetX - sheepimage.width / 2;
+            elementsheep[1] = e.offsetY - sheepimage.height / 2;
+            console.log(e.offsetX - sheepimage.width, e.offsetX);
+          } else if (!!elementsheep[3] && !elementsheep[2]) {
+            elementsheep[3] = 0;
+            elementsheep[0] = e.offsetX + (sheepimage.width*2 - sheepimage.width/2);
+            elementsheep[1] = e.offsetY - sheepimage.height / 2;
+            console.log(e.offsetX + (sheepimage.width*2 - sheepimage.width/2), elementsheep[0], index);
+          }
+        }
+      });
+
+      function animate() {
+        //draw bg
+        ctx.beginPath();
+        ctx.drawImage(bgimage, 0, 0);
+        for (let index = 0; index < sheep.length; index++) {
+          const elementsheep = sheep[index];
+          if (!!elementsheep[3]) {
+            ctx.beginPath();
+            ctx.strokeStyle = "red";
+            if (!!elementsheep[2]) {
+              ctx.rect(
+                elementsheep[0],
+                elementsheep[1],
+                sheepimage.width,
+                sheepimage.height
+              );
+            } else {
+              ctx.rect(
+                elementsheep[0] - sheepimage.width * 2,
+                elementsheep[1],
+                sheepimage.width,
+                sheepimage.height
+              );
+            }
+            ctx.stroke();
+          }
+        }
+        //col sheep
+        for (let index = 0; index < sheep.length; index++) {
+          const elementsheep = sheep[index];
+          for (let index = 0; index < elements["water"].length; index++) {
+            const element = elements["water"][index];
+            if (
+              (elementsheep[2] === 1 &&
+                elementsheep[0] < element[0] + element[2] &&
+                elementsheep[0] + sheepimage.width > element[0] &&
+                elementsheep[1] < element[1] + element[3] &&
+                elementsheep[1] + sheepimage.height > element[1]) ||
+              (elementsheep[2] === 0 &&
+                elementsheep[0] - sheepimage.width * 2 <
+                  element[0] + element[2] &&
+                elementsheep[0] - sheepimage.width > element[0] &&
+                elementsheep[1] < element[1] + element[3] &&
+                elementsheep[1] + sheepimage.height > element[1])
+            ) {
+              if (elementsheep[4][1] === 0) {
+                elementsheep[4][0].play();
+                elementsheep[4][1] = 1;
+                console.log(elementsheep[4][0], (elementsheep[4][1] = 1));
+              }
+            } else {
+              elementsheep[4][1] = 0;
+              elementsheep[4][0].pause();
+            }
+          }
+        }
+
+        //draw element
+        ctx.beginPath();
+        for (let index = 0; index < sheep.length; index++) {
+          const element = sheep[index];
+          ctx.save();
+
+          if (!!element[2]) {
+            ctx.scale(1, 1);
+            ctx.drawImage(
+              sheepimage,
+              0,
+              0,
+              sheepimage.width,
+              sheepimage.height,
+              element[0],
+              element[1],
+              sheepimage.naturalWidth,
+              sheepimage.naturalHeight
+            );
+          } else {
+            ctx.scale(-1, 1);
+            ctx.drawImage(
+              sheepimage,
+              0,
+              0,
+              sheepimage.width,
+              sheepimage.height,
+              -(element[0] - sheepimage.naturalWidth),
+              element[1],
+              sheepimage.naturalWidth,
+              sheepimage.naturalHeight
+            );
+          }
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.restore();
+        }
+        requestAnimationFrame(animate);
+      }
+      if (finished === 2) {
+        animate();
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+</head>
+<style>
+    *{
+            box-sizing: border-box;
+    }
+    body {
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+    }
+    canvas {
+            border: 3px solid black;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+            
+           /* margin-top: 50px;*/
+    }
+</style>
+<body>
+    <canvas></canvas>
+</body>
+<script defer>
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width  = 256
+    ctx.canvas.height = 256
+
+    var cw = canvas.width
+    var ch = canvas.height
+
+
+        var x1 
+        var y1 
+        var x2
+        var y2
+        var row = 0
+        var scl = 8
+        let index = 0
+        var spread = 3
+        var imgdata ;
+function drawstart(){
+    for (index; index < cw + scl; index += scl) {
+        var random = Math.floor(Math.random() * spread + 1)
+        if(random === spread){
+            ctx.fillRect(index - scl, row, scl,scl)
+        }
+        if(index === cw && ch > row){
+            row += scl
+            index = 0
+        }
+        imgdata = ctx.getImageData(0,0,cw,ch)
+    }
+}
+window.onclick = blureffect()
+
+    function blureffect(){
+        ctx.filter = `blur(${scl}px)`;
+        drawstart()
+        imgdata = ctx.getImageData(0,0,cw,ch)
+        
+        row = 0
+        index = 0
+        for (index; index < imgdata.data.length/scl; index += scl) {
+           //console.log(imgdata.data[index])
+        }
+    };
+
+drawstart()
+</script>
+</html>

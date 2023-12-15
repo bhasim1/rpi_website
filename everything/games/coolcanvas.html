@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+</head>
+<style>
+    *{
+            box-sizing: border-box;
+    }
+    body {
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+    }
+    canvas {
+            border: 3px solid black;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+            background-color: rgb(199, 199, 199);
+           /* margin-top: 50px;*/
+    }
+</style>
+<body>
+    <canvas></canvas>
+    <button onclick="rload()">Reload</button>
+</body>
+<script defer>
+    function rload(){
+        location.reload() 
+}
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width  = window.innerWidth - 6///4;
+    ctx.canvas.height = window.innerHeight - 6//-100;
+
+    var cw = canvas.width
+    var ch = canvas.height
+
+        var x = Math.floor(Math.random() * cw) 
+        var y = Math.floor(Math.random() * ch)
+        while(x + radius> canvas.width || x - radius < canvas.width){
+            x = Math.floor(Math.random() * cw)
+        }
+        while(y + radius > canvas.height || y - radius < canvas.height){
+            y = Math.floor(Math.random() * ch)
+        }
+
+        var x1 
+        var y1 
+        var x2
+        var y2
+        var radius = Math.floor(Math.random() * 30) + 60;
+        var vx = Math.floor(Math.random()* 20 - 10 ) * 4;
+        var vy = Math.floor(Math.random()* 20 - 10 ) * 4;
+        var rainbowcolor = 0
+        var rainbowcolorball = rainbowcolor + 128
+        var circle
+
+        ctx.canvas.width  = window.innerWidth - 6///4;
+        ctx.canvas.height = window.innerHeight - 6//-100;
+
+        const saveway = []
+
+        class ball{
+            constructor(x, y, radius, color){
+                this.x = x
+                this.y = y
+                this.radius = radius
+                this.color = color
+            }
+            draw(){
+                ctx.fillStyle = this.color
+                ctx.arc(this.x, this.y, this.radius, Math.PI * 2, false)
+            }
+        }
+
+ 
+function animate(){
+    x += vx
+    y += vy
+    requestAnimationFrame(animate);
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${rainbowcolor} , 50%, 50%, 0.2)`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fill();
+    ctx.closePath()
+    circle = new ball(x, y, radius, 'hsla(' + rainbowcolorball + ' , 50%, 50%, 1)')
+    circle.draw()
+    ctx.fill()
+    ctx.closePath()
+    rainbowcolor++;
+    rainbowcolorball++;
+    if(x + radius > canvas.width || x - radius < 0){
+        vx = -vx;
+    }
+    if(y + radius > canvas.height || y - radius < 0){
+        vy = -vy;
+    }
+    
+}
+animate()
+</script>
+</html>

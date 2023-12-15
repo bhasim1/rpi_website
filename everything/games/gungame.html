@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script>
+      let ctx;
+      class game {
+        init() {
+          this.canvas = document.querySelector("canvas");
+          this.canvas.width = window.innerWidth;
+          this.canvas.height = window.innerHeight;
+          ctx = this.canvas.getContext("2d");
+        }
+        spawnball(x, y, vx) {
+          this.angle = Math.atan2(x, y);
+          this.y = y;
+          this.x = x;
+          this.vx = vx;
+          this.x = this.x += this.vx;
+        }
+      }
+      function animate(x, y) {
+        g.x += g.vx;
+        console.log(g.x,g.y);
+        ctx.clearRect(0,0,10000,10000)
+        requestAnimationFrame(animate);
+        ctx.beginPath();
+        ctx.rotate(g.angle);
+        ctx.arc(g.y, g.x, 20, 0, Math.PI * 2);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillRect(200, 400, 100, 100);
+
+        ctx.fill();
+        ctx.closePath();
+        console.log("animateion");
+      }
+      const g = new game();
+      g.init();
+      g.spawnball(200, 300, 5);
+
+      window.addEventListener("click", (e)=>{
+        console.log(e.offsetX,e.offsetY);
+        g.spawnball(e.offsetX,e.offsetY, 2)
+        animate()
+      })
+    </script>
+  </body>
+</html>

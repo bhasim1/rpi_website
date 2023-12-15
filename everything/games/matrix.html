@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        text-align: center;
+        overflow: hidden;
+      }
+      canvas {
+        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+    <script defer>
+      class matrix {
+        init() {
+          this.stopanimation = false;
+          this.iconimage = new Image();
+          this.imgsize = 256;
+          this.iconimage.src = "./icon.png";
+          this.last = performance.now();
+
+          this.canvas = document.querySelector("canvas");
+          this.canvas.width = window.innerWidth;
+          this.canvas.height = window.innerHeight;
+          this.cw = this.canvas.width;
+          this.ch = this.canvas.height;
+          this.ctx = this.canvas.getContext("2d");
+
+          this.line = [];
+
+          this.fontsize = 20;
+          this.ctx.font = this.fontsize + "px Monospace";
+          this.ctx.textAlign = "left";
+          this.ctx.textBaseline = "midlle";
+          this.ctx.clearRect(0, 0, this.cw, this.ch);
+
+          this.ctx.fillStyle = "rgba(13, 13, 13, 1)";
+
+          this.ctx.moveTo(0, 0);
+          this.ctx.rect(0, 0, this.cw, this.ch);
+          this.ctx.fill();
+
+          this.iconimage.onload = animate;
+        }
+
+        cleanline() {
+          const basearr = [];
+          for (let index = 0; index < this.line.length; index++) {
+            this.line[index] != undefined
+              ? basearr.push(this.line[index])
+              : null;
+          }
+          this.line = basearr;
+        }
+
+        randomnumber() {
+          let num = Math.floor(Math.random() * 9) + 48;
+          let n = String.fromCharCode(num);
+          return n;
+        }
+
+        spawnnewline() {
+          let x =
+            Math.floor(Math.random() * (this.cw - this.fontsize * 2)) +
+            this.fontsize;
+          let y = -Math.floor(Math.random() * this.fontsize * 20);
+          this.line.push([x, y]);
+        }
+
+        drawlines() {
+          this.line.forEach((element, index) => {
+            this.line[index][1] += this.fontsize * 1.25;
+            if (element[1] >= this.ch && index === 0) {
+              this.line.shift();
+            } else if (element[1] >= this.ch) {
+              delete this.line[index];
+            } else {
+              this.ctx.fillStyle = "#53c23a";
+
+              this.ctx.moveTo(element[0], element[1]);
+              this.ctx.fillText(this.randomnumber(), element[0], element[1]);
+            }
+          });
+        }
+      }
+
+      const ma = new matrix();
+      ma.init();
+      window.addEventListener("resize", () => {
+        ma.init();
+      });
+
+      function animate() {
+          if (ma.last + 100 <= performance.now() && !ma.stopanimation) {
+            ma.cleanline();
+
+            ma.ctx.fillStyle = "rgba(13, 13, 13, 0.1)";
+            ma.ctx.moveTo(0, 0);
+            ma.ctx.rect(0, 0, ma.cw, ma.ch);
+            ma.ctx.fill();
+
+            if (Math.floor(Math.random() * 3) === 0) {
+              ma.spawnnewline();
+            }
+            ma.drawlines();
+
+            ma.ctx.drawImage(
+              ma.iconimage,
+              0,
+              0,
+              ma.iconimage.naturalWidth,
+              ma.iconimage.naturalHeight,
+              ma.cw / 2 - ma.imgsize / 2,
+              ma.ch / 2 - ma.imgsize / 2,
+              ma.imgsize,
+              ma.imgsize
+            );
+            ma.last = performance.now();
+          }
+          requestAnimationFrame(animate)
+        }
+    </script>
+  </body>
+</html>

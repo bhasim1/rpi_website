@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>graph</title>
+    </head>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: left;
+            margin-left: 50px;
+            font-size: 1.75rem;
+        }
+        body {
+            margin: 0;
+            background-color: grey;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            margin-top: 5px;
+            padding: 5px;
+            background-color: rgb(255, 255, 255);
+            border: 3px solid black;
+            border-radius: 5px;
+            position: absolute;
+            top:0;
+            right: 50px;
+            width: 50%;
+            
+        }
+
+        #toolbar button, #toolbar p{
+            display: inline-block;
+            font-size: 1.5rem;
+        }
+
+        #toolbar button{
+            background-color: rgb(255, 255, 255);
+            border: 3px solid black;
+            border-radius: 5px;
+            padding: 2px;
+            margin: 2px;
+        }
+
+        button{
+            background-color: grey;
+        }
+
+        #hidden{
+            display: none;
+        }
+
+        canvas {
+            z-index: -1;
+            border: 3px solid black;
+            background-color: white;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+        }
+            
+    </style>
+    <body>
+    <h1>graphcontrol with js</h1><div id="toolbar">
+        <label for="scale">scale</label>
+        <input name="scale" type="number" value="10">
+        <label for="scale">Y-achsenabschnitt</label>
+        <input name="Y-achsenabschnitt" type="number" value="0">
+        <label for="scale">steigung</label>
+        <input name="steigung" type="number" value="1">
+
+        <label for="calctype">calctype</label>
+        <select name="calctype">
+          <option value="+">plus</option>
+          <option value="-">minus</option>
+          <option value="*">multiply</option>
+          <option value="/">divide</option>
+          <option value="square">square</option>
+          <option value="root">root</option>
+          <option value="sin">sin</option>
+        </select>
+<br>
+        <button id="submitbtn" onclick="drawgraph()">drawgraph</button>
+        <button id="submitbtn" onclick="clearcanvas()">Clear</button>
+    
+    </div>
+        <canvas></canvas>
+    </body>
+    <script defer>
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext('2d');
+        const submitbtn = document.getElementById("submitbtn")
+        const scale = document.querySelector("input[name=scale]")
+        const calctype = document.querySelector("select")
+        const Yachsenabschnitt = document.querySelector("input[name=Y-achsenabschnitt]")
+        const Steigung = document.querySelector("input[name=steigung]")
+
+
+
+        var x1
+        var y1
+        var x2 = 0
+        var y2 = 0 
+
+        var drawing = false
+        var drawbox = false
+        var drawpen = false
+        var drawcir = false
+        var straightline = false
+        var colorfull = false
+        var drawingcur
+        var colorarray = ["#ff0000", "#ff7f00", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#8b00ff",]
+        var count = 0
+        var posgraph = 0
+        var calctypevalue = calctype.value
+        var b = Yachsenabschnitt.value
+        var m = Steigung.value
+      
+        ctx.canvas.width  = window.innerHeight - 100;
+        ctx.canvas.height = window.innerHeight - 100;
+
+        var cw = canvas.width
+        var ch = canvas.height
+        
+        var num = scale.value
+
+ctx.beginPath();  
+ctx.translate(cw/2,ch/2)
+
+calctype.addEventListener("change", (e) => {calctypevalue = e.target.options[e.target.selectedIndex].value}, false)
+Steigung.addEventListener("change", (e) => {m = Steigung.value; console.log(Steigung.value)}, false)
+scale.addEventListener("change", (e) => {num = scale.value; console.log(Steigung.value)}, false)
+drawline()
+
+function drawline(){
+ctx.fillStyle = "black"
+ctx.lineWidth = 3
+
+let posx = new Path2D;
+posx.moveTo(0,0)
+posx.lineTo(cw/2, 0)
+ctx.stroke(posx);
+       
+let posy = new Path2D;
+posy.moveTo(0,0)
+posy.lineTo(0, ch/2)
+ctx.stroke(posy);
+
+let negx = new Path2D;
+negx.moveTo(0,0)
+negx.lineTo(-cw/2, 0)
+ctx.stroke(negx);
+
+let negy = new Path2D;
+negy.moveTo(0,0)
+negy.lineTo(0, -ch/2)
+ctx.stroke(negy);
+
+ctx.font = '12px serif';
+for (let index = 0; index < num; index++) {
+    var pos = index * num
+    ctx.fillText(index, pos += 5, 12)
+}
+for (let index = 0; index < num; index++) {
+    var pos = -(index * num)
+    if(index != 0)
+    ctx.fillText(index, pos, 12)
+}
+for (let index = 0; index < num; index++) {
+    var pos = index * num
+    if(index != 0)
+    ctx.fillText(index, 6, pos += 12)
+}
+for (let index = 0; index < num; index++) {
+    var pos = -(index * num)
+    if(index != 0)
+    ctx.fillText(index, 6, pos += 12)
+}
+};
+
+function drawgraph(){
+    b = Yachsenabschnitt.value
+    for (let index = 0; index < scale.value; index++) {
+    x1 = -(index * 5)
+    switch(calctypevalue){
+        case "+":
+            y1 = -b;
+            break;
+        case "-":
+            y1 = b;
+            break;
+        case "*":
+            y1 = -(x1 * m);
+            break;
+        case "/":
+            y1 = -(x1 / m);
+            break;
+        case "square":
+            y1 = -(x1 * x1)
+            break;
+        case "root":
+            y1 = -Math.sqrt(x1);
+            break;
+        case "sin":
+            y1 = -Math.sin(x1)*50;
+            break;
+    }
+    ctx.moveTo(x2,y2)
+    ctx.lineTo(x1, y1)
+    ctx.stroke()
+    x2 = x1
+    y2 = y1
+    }
+    for (let index = 0; index < scale.value; index++) {
+    x1 = (index * 5)
+    switch(calctypevalue){
+        case "+":
+            y1 = -b;
+            break;
+        case "-":
+            y1 = b;
+            break;
+        case "*":
+            y1 = -(x1 * m);
+            break;
+        case "/":
+            y1 = -(x1 / m);
+            break;
+        case "square":
+            y1 = -(x1 * x1)
+            break;
+        case "root":
+            y1 = -Math.sqrt(x1);
+            break;
+        case "sin":
+            y1 = -Math.sin(x1)*50;
+            break;
+    }
+    ctx.moveTo(x2,y2)
+    ctx.lineTo(x1, y1)
+    ctx.stroke()
+    x2 = x1
+    y2 = y1
+    }
+}
+
+function clearcanvas(){
+ctx.clearRect(-cw,-ch,2*cw,2*ch)
+drawline()
+x1 =0
+y1 = 0
+x2 = 0
+y2 = 0
+calctypevalue = null
+ctx.moveTo(0,0)
+}
+
+   
+
+    </script>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>cool</title>
+  </head>
+  <style>
+    canvas {
+      border: 3px solid black;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+      border-radius: 5px;
+    }
+  </style>
+  <body>
+    <div></div>
+  </body>
+  <script defer>
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("width", "300px");
+    canvas.setAttribute("height", "300px");
+
+
+    const ctx = canvas.getContext("2d");
+    ctx.font = "bold 180px serif";
+
+    const cw = canvas.width;
+    const ch = canvas.height;
+
+    var lightness = 45
+    var turn = 0
+    const day = new Date().getDate();
+
+    if (day >= 0) {
+      document.querySelector("div").after(canvas);
+      animate();
+    }
+
+    function animate() {
+        if (turn === 0) {
+            lightness -= 0.5
+            if(lightness <= 30){
+                turn = 1
+            }
+        }else{
+            lightness += 0.5
+            if(lightness >= 60){
+                turn = 0
+            }
+        }
+      ctx.beginPath();
+      ctx.lineWidth = 10;
+      console.log(lightness)
+      ctx.strokeStyle = `hsl(0, 100%, ${lightness}%)`;
+      ctx.lineCap = "round";
+      ctx.moveTo(cw / 2, 10);
+      ctx.lineTo(10, ch - 10);
+      ctx.lineTo(cw - 10, ch - 10);
+      ctx.lineTo(cw / 2, 10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.fillText("!", cw / 2 - cw / 10, ch / 2 + (cw / 10) * 3);
+      ctx.fill();
+      requestAnimationFrame(animate);
+    }
+  </script>
+</html>

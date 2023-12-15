@@ -1,0 +1,13 @@
+* {
+    box-sizing: border-box;
+}
+
+#temp {
+    font-size: 4rem;
+}
+
+#svgtemp {
+    width: 4vw;
+    min-width: 32px;
+    height: auto;
+}

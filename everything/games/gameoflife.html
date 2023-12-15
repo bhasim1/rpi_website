@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  </head>
+  <body>
+    <canvas></canvas>
+    <div id="draggable" class="ui-widget-content">
+      <p id="cycle">0</p>
+      <button onclick="g.play()">start/stop/resume</button>
+      <button onclick="g.reset(); g.drawgrid()">clear</button>
+
+      <label for="prebuild">Choose an prebuild element</label>
+
+      <select name="prebuild" id="prebuild"></select>
+      <button onclick="toggle()" id="selectprebuild">select to preview</button>
+
+      <input type="text" id="speed" value="200" />
+    </div>
+    <script>
+      const canvas = document.querySelector("canvas");
+      canvas.width = window.innerWidth - 10 - ((window.innerWidth - 10) % 32);
+      canvas.height =
+        window.innerHeight - 10 - ((window.innerHeight - 10) % 32);
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const ctx = canvas.getContext("2d");
+
+      const prebuild = ["flyer", "blink1"];
+
+      const prebuildmaps = [
+        [
+          "flyer",
+          [
+            [0, 1, 0],
+            [0, 0, 1],
+            [1, 1, 1],
+          ],
+        ],
+        [
+          "blink1",
+          [
+            [0, 1, 0],
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 0],
+          ],
+        ],
+      ];
+
+      const scl = 32;
+
+      class game {
+        constructor() {
+          this.isprebuildselected = false;
+          this.selectedindex = null;
+          this.playstate = 0;
+          this.generation = 0;
+          this.map = [];
+          for (let i = 0; i < ch / scl; i++) {
+            this.innermap = [];
+            for (let index = 0; index < cw / scl; index++) {
+              this.innermap.push(0);
+            }
+            this.map.push(this.innermap);
+          }
+          this.nextmap = [];
+          for (let i = 0; i < ch / scl; i++) {
+            this.innernextmap = [];
+            for (let index = 0; index < cw / scl; index++) {
+              this.innernextmap.push(0);
+            }
+            this.nextmap.push(this.innernextmap);
+          }
+        }
+
+        init() {
+          canvas.addEventListener("mousedown", (e) => {
+            console.log(e);
+            if (e.buttons === 1 && this.isprebuildselected === false) {
+              let x = e.offsetX - (e.offsetX % scl);
+              let y = e.offsetY - (e.offsetY % scl);
+              this.drawbox(x, y);
+            } else if (e.buttons === 1 && this.isprebuildselected === true) {
+              let x = (e.offsetX - (e.offsetX % scl)) / scl;
+              let y = (e.offsetY - (e.offsetY % scl)) / scl;
+
+              this.drawprebuild(this.selectedindex, x, y);
+            } else {
+              let x = e.offsetX - (e.offsetX % scl);
+              let y = e.offsetY - (e.offsetY % scl);
+            }
+          });
+          canvas.addEventListener("mousemove", (e) => {
+            if (this.isprebuildselected) {
+              let x = (e.offsetX - (e.offsetX % scl)) / scl;
+              let y = (e.offsetY - (e.offsetY % scl)) / scl;
+              console.log(this.selectedindex);
+              this.previewprebuild(this.selectedindex, x, y);
+            }
+          });
+        }
+
+        drawgrid() {
+          ctx.beginPath();
+          ctx.fillStyle = "black";
+          for (let i = 0; i < ch / scl; i++) {
+            for (let index = 0; index < cw / scl; index++) {
+              ctx.rect(index * scl, i * scl, 32, 32);
+            }
+          }
+          ctx.stroke();
+          ctx.closePath();
+        }
+
+        drawbox(x, y) {
+          ctx.beginPath();
+
+          ctx.fillStyle = "rgb(180, 254, 104)";
+          if (this.map[y / scl][x / scl] === 0) {
+            ctx.fillRect(x, y, scl, scl);
+            this.map[y / scl][x / scl] = 1;
+          } else {
+            ctx.clearRect(x, y, scl, scl);
+            this.map[y / scl][x / scl] = 0;
+          }
+
+          ctx.closePath();
+          this.drawgrid();
+        }
+
+        drawallboxes() {
+          for (let i = 0; i < this.map.length; i++) {
+            const el = this.map[i];
+            for (let index = 0; index < el.length; index++) {
+              if (this.map[i][index] === 1) {
+                ctx.beginPath();
+                ctx.fillStyle = "rgb(180, 254, 104)";
+                ctx.fillRect(index * scl, i * scl, scl, scl);
+                ctx.closePath();
+                this.drawgrid();
+              }
+            }
+          }
+        }
+
+        previewprebuild(index, x, y) {
+          console.log(index);
+          ctx.clearRect(0, 0, cw, ch);
+          this.drawgrid();
+          this.drawallboxes();
+          this.playstate = 0;
+          const element = prebuildmaps[index][1];
+          ctx.beginPath();
+          ctx.fillStyle = "rgb(180, 254, 104)";
+          for (let index = 0; index < element.length; index++) {
+            for (let i = 0; i < element[index].length; i++) {
+              if (element[index][i] === 1) {
+                ctx.fillRect(x * scl + i * scl, y * scl + index * scl, 32, 32);
+              }
+            }
+          }
+          ctx.closePath();
+        }
+
+        drawprebuild(index, x, y) {
+          const element = prebuildmaps[index][1];
+          ctx.beginPath();
+          ctx.fillStyle = "rgb(180, 254, 104)";
+          for (let index = 0; index < element.length; index++) {
+            for (let i = 0; i < element[index].length; i++) {
+              console.log(y + index, x + i);
+              if (element[index][i] === 1) {
+                this.map[y + index][x + i] = 1;
+              }
+            }
+          }
+          this.drawallboxes();
+
+          ctx.closePath();
+        }
+
+        reset() {
+          this.generation = 0;
+          this.map = [];
+          for (let i = 0; i < ch / scl; i++) {
+            this.innermap = [];
+            for (let index = 0; index < cw / scl; index++) {
+              this.innermap.push(0);
+            }
+            this.map.push(this.innermap);
+          }
+          ctx.beginPath();
+          ctx.clearRect(0, 0, cw, ch);
+          ctx.closePath();
+          this.generation = 0;
+          document.getElementById("cycle").innerHTML = this.generation;
+          this.playstate = 0;
+        }
+
+        play() {
+          console.log(this.playstate);
+          if (this.playstate === 0) {
+            this.playstate = 1;
+            animate();
+          } else if (this.playstate === 1) {
+            this.playstate = 0;
+          }
+        }
+
+        countneighbors(i, index) {
+          let heat = 0;
+          //oben
+          if (i - 1 > -1) {
+            console.log(this.map[i - 1][index]);
+            if (this.map[i - 1][index] === 1) {
+              heat += 1;
+            }
+          }
+          //obenrechts
+          if (i - 1 > -1 && index + 1 < this.map[0].length) {
+            if (this.map[i - 1][index + 1] === 1) {
+              heat += 1;
+            }
+          }
+          //rechts
+          if (index + 1 < this.map[0].length) {
+            if (this.map[i][index + 1] === 1) {
+              heat += 1;
+            }
+          }
+          //unten rechts
+          if (i + 1 < this.map.length && index + 1 < this.map[0].length) {
+            if (this.map[i + 1][index + 1] === 1) {
+              heat += 1;
+            }
+          }
+          //unten
+          if (i + 1 < this.map.length) {
+            if (this.map[i + 1][index] === 1) {
+              heat += 1;
+            }
+          }
+          //unten links
+          if (i + 1 < this.map.length && index - 1 > -1) {
+            if (this.map[i + 1][index - 1] === 1) {
+              heat += 1;
+            }
+          }
+          //links
+          if (index - 1 > -1) {
+            if (this.map[i][index - 1] === 1) {
+              heat += 1;
+            }
+          }
+          //oben links
+          if (i - 1 > -1 && index - 1 > -1) {
+            if (this.map[i - 1][index - 1] === 1) {
+              heat += 1;
+            }
+          }
+
+          return heat;
+        }
+
+        cycle() {
+          for (let i = 0; i < this.map.length; i++) {
+            const el = this.map[i];
+            for (let index = 0; index < el.length; index++) {
+              //live
+              let heat = this.countneighbors(i, index);
+
+              if (this.map[i][index] === 0 && heat === 3) {
+                console.log(index, i);
+                console.log(this.countneighbors(i, index));
+                //revive dead
+                this.nextmap[i][index] = 1;
+              } else if (this.map[i][index] === 0 && heat < 3) {
+                //dont revive if too much
+                this.nextmap[i][index] = 0;
+              } else if (this.map[i][index] === 1 && (heat < 2 || heat > 3)) {
+                //kill over under population
+                this.nextmap[i][index] = 0;
+              } else if (
+                this.map[i][index] === 1 &&
+                (heat === 2 || heat === 3)
+              ) {
+                //good eneough
+                this.nextmap[i][index] = 1;
+              } else {
+                this.nextmap[i][index] = 0;
+              }
+            }
+          }
+        }
+
+        update() {
+          ctx.clearRect(0, 0, cw, ch);
+          this.drawgrid();
+          this.drawallboxes();
+        }
+      }
+
+      const g = new game();
+      g.init();
+      g.drawgrid();
+
+      function animate() {
+        if (g.playstate === 1) {
+          setTimeout(animate, parseInt(document.getElementById("speed").value));
+          g.generation += 1;
+          g.cycle();
+
+          g.map = g.nextmap;
+          g.nextmap = [];
+          for (let i = 0; i < ch / scl; i++) {
+            g.innernextmap = [];
+            for (let index = 0; index < cw / scl; index++) {
+              g.innernextmap.push(0);
+            }
+            g.nextmap.push(g.innernextmap);
+          }
+
+          g.update();
+
+          document.getElementById("cycle").innerHTML = g.generation;
+        }
+      }
+
+      let btntoggle = 0;
+      function toggle() {
+        const btn = document.querySelector("#selectprebuild");
+        if (btntoggle === 0) {
+          btntoggle = 1;
+
+          btn.innerHTML =
+            "selected " + document.querySelector("#prebuild").value;
+
+          g.isprebuildselected = true;
+
+          let selectedindex = document.querySelector("#prebuild").value;
+          console.log(selectedindex);
+
+          if (selectedindex !== -1) {
+            g.selectedindex = parseInt(selectedindex);
+          }
+        } else {
+          btntoggle = 0;
+          ctx.clearRect(0, 0, cw, ch);
+          g.drawgrid();
+          g.drawallboxes();
+          btn.innerHTML = "select to preview";
+
+          g.isprebuildselected = false;
+          g.selectedindex = null;
+        }
+      }
+
+      $(function () {
+        $("#draggable").draggable();
+      });
+      const select = document.querySelector("#prebuild");
+      prebuild.forEach((el, ind) => {
+        const option = document.createElement("option");
+        option.value = ind;
+        option.innerHTML = el;
+        option.setAttribute("selected", "selected");
+        select.appendChild(option);
+      });
+    </script>
+    <style>
+      * {
+        box-sizing: border-box;
+        background-color: rgb(4, 4, 4);
+      }
+
+      body {
+        margin: 0;
+
+        width: 100vw;
+        height: 100vh;
+      }
+
+      canvas {
+        background-color: rgb(36, 36, 36);
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border: 5px rgb(180, 254, 104) solid;
+        border-radius: 5px;
+        cursor: crosshair;
+      }
+      #prebuild,
+      #draggable,
+      input,
+      button,
+      p {
+        width: fit-content;
+        max-width: 30rem;
+        margin: 1rem;
+        font-size: 1.5rem;
+        background-color: rgb(180, 254, 104);
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border: 5px rgb(180, 254, 104) solid;
+        border-radius: 5px;
+        color: rgb(36, 36, 36);
+      }
+      input {
+        width: 10ch;
+      }
+      #draggable {
+        position: absolute;
+        top: 0;
+        width: 30rem;
+        padding: 0.5rem;
+        background-color: black;
+      }
+      :focus,
+      :focus-within,
+      :target {
+        outline: none;
+      }
+    </style>
+  </body>
+</html>

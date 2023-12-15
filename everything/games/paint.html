@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Paint</title>
+    </head>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: left;
+            margin-left: 50px;
+        }
+        body {
+            margin: 0;
+            background-color: grey;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #toolbar {
+            margin-top: 5px;
+            padding: 5px;
+            background-color: rgb(255, 255, 255);
+            border: 3px solid black;
+            border-radius: 5px;
+            position: absolute;
+            top:0;
+            right: 5px;
+            width: 85vw;
+            height: 7rem;
+        }
+
+        #toolbar button, #toolbar p{
+            display: inline-block;
+            font-size: 1rem;
+            height: 4ch;
+        }
+
+        #toolbar button{
+            background-color: white;
+            border: 3px solid black;
+            border-radius: 5px;
+            padding: 2px;
+            margin: 2px;
+        }
+
+        button{
+            background-color: grey;
+        }
+
+        #hidden{
+            display: none;
+        }
+
+        canvas {
+            border: 3px solid black;
+            background-color: white;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+        }
+            
+        .around{
+            font-size: 1rem;
+            display: inline-block;
+            margin: 0.2rem;
+            padding: 0.5rem;
+            border: 3px solid black;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+
+        #showtextsize{
+            position: absolute;
+            top:0;
+            left: 0;
+        }
+    </style>
+    <body>
+        <h1>Paint with js</h1>
+        <div id="toolbar">
+        <div class="around">
+        <label for="color">color ></label>
+        <input type="color" name="color" id="color"  value="#808080">
+    </div><div class="around">
+        <label for="lw">size ></label>
+        <input type="range" id="lw" name="lw" min="1" max="100">
+    </div><div class="around">
+        <label for="opacity">opacity ></label>
+        <input type="range" id="opacity" name="opacity" min="1" max="100">
+    </div><div class="around">
+        <label for="crazy">crazy ></label>
+        <input  type="checkbox" id="crazy" name="crazy"/>
+        <br>
+    </div><div class="around">
+        <label for="text">text ></label>
+        <input  type="text" id="text" name="text"/>
+        <br>
+    </div>
+        <button onclick="line()">draw straight Line</button>
+        <button onclick="textbtn()">text</button>
+        <button onclick="box()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bounding-box" viewBox="0 0 16 16"><path d="M5 2V0H0v5h2v6H0v5h5v-2h6v2h5v-5h-2V5h2V0h-5v2H5zm6 1v2h2v6h-2v2H5v-2H3V5h2V3h6zm1-2h3v3h-3V1zm3 11v3h-3v-3h3zM4 15H1v-3h3v3zM1 4V1h3v3H1z"/> </svg></button>
+        <button onclick="pen()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg></button>
+        <button onclick="cir()">draw with Circle(bigger size)</button>
+        <button onclick="clearcanvas()">clear</button>
+        <br>
+        <p>Curently drawing with </p> <p id="drawingcur">nothing</p>
+    </div>
+
+    <div id="showtextsize"></div>
+
+        <canvas></canvas>
+    <form  method="post" action="/upload/uploadcanvas.php"  enctype="multipart/form-data" class="canvasupload">
+            <input name="uploadcanvasbase64" type="text" id="hidden"/>
+            <input name="uploadcanvasname" type="text" placeholder="name of the picture"/>
+            <input type="submit" class="submit btn-primary" id="uploadcanvas" value="upload canvas">
+    </form>
+    </body>
+    <script defer>
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext('2d');
+        const pcurout = document.querySelector("#drawingcur");
+        const lwinput = document.querySelector("#lw");
+        const colorinput = document.querySelector("#color");
+        const crazy = document.querySelector("#crazy");
+        const canvasuploadinput = document.querySelector("#hidden");
+        const opacityinput = document.getElementById("opacity")
+        const textinput = document.getElementById("text")
+        const showtextsize = document.getElementById("showtextsize")
+
+        var x1
+        var y1
+        var x2
+        var y2
+        var drawing = false
+        var drawbox = false
+        var drawpen = true
+        var drawcir = false
+        var straightline = false
+        var colorfull = false
+        var text = false
+        var drawingcur
+        var colorarray = ["#ff0000", "#ff7f00", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#8b00ff",]
+        var count = 0
+        var color = colorinput.value
+
+        ctx.canvas.width  = window.innerWidth - 100;
+        ctx.canvas.height = window.innerHeight - 150;
+        ctx.lineCap = "round"
+
+        function box(){
+        drawbox = true
+        drawpen = false
+        drawcir = false
+        straightline = false
+        pcurout.textContent = " box";
+       }
+       function pen(){
+        drawpen = true
+        drawbox = false
+        drawcir = false
+        straightline = false
+        pcurout.textContent = " pen";
+       }
+       function line(){
+        straightline = true
+        drawpen = false
+        drawbox = false
+        drawcir = false
+        pcurout.textContent = " straight line";
+       }
+       function cir(){
+        drawcir = true
+        drawpen = false
+        drawbox = false
+        straightline = false
+        pcurout.textContent = " circle";
+       }
+       function textbtn(){
+        drawcir = false
+        drawpen = false
+        drawbox = false
+        straightline = false
+        text = true
+        pcurout.textContent = " text";
+       }
+       function clearcanvas(){
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+       }
+
+    function check(){
+       if(crazy.checked === true){
+            color = colorarray[Math.floor(Math.random() * 7)]
+         }
+       }
+
+       colorinput.addEventListener("input", e => {
+        color = colorinput.value
+       })
+       crazy.addEventListener("input", e => {
+        color = colorinput.value
+       })
+
+
+       //mouse down
+        canvas.addEventListener("mousedown", e => {
+            ctx.globalAlpha = opacityinput.value / 100;
+            e.preventDefault
+            drawing = true
+            x1 = parseFloat(e.offsetX)
+            y1 = parseFloat(e.offsetY)
+            check();
+        });
+
+
+        //mouse move
+        canvas.addEventListener("mousemove", e =>{
+         if(!drawbox && !straightline){
+            x1 = parseFloat(e.offsetX)
+            y1 = parseFloat(e.offsetY)
+        }
+
+            if (drawing === true && drawpen === true) {
+            drawLine(x1, y1, e.offsetX, e.offsetY);
+            }
+
+            if (drawing === true && drawcir === true) {
+            drawcircle(x1, y1, e.offsetX, e.offsetY);
+            }
+
+            check();
+
+            if (drawing === true && text === true){
+            showtextsize.style.top = `${e.y + 5}px`
+            showtextsize.style.left = `${e.x}px`
+            showtextsize.style.fontSize = `${lwinput.value}px`
+            showtextsize.innerHTML = textinput.value
+           };
+        })
+
+
+        //mouse up
+        canvas.addEventListener("mouseup", e => {
+            e.preventDefault
+            x2 = parseFloat(e.offsetX)
+            y2 = parseFloat(e.offsetY)
+            uploadcanvas = canvas.toDataURL()
+            canvasuploadinput.value = uploadcanvas
+
+            if (drawing === true && drawbox === true){
+                ctx.beginPath();
+                ctx.lineWidth = lwinput.value;
+                ctx.strokeStyle = color;
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x1, y2);
+                ctx.lineTo(x2, y2);
+                ctx.lineTo(x2, y1);
+                ctx.lineTo(x1, y1);
+                ctx.closePath()
+                ctx.stroke();
+                
+           }
+           if (drawing === true && straightline === true){
+                ctx.beginPath();
+                ctx.lineWidth = lwinput.value;
+                ctx.strokeStyle = color;
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                console.log(x1, y1)
+                console.log(x2, y2)
+           }
+           if (drawing === true && text === true){
+            showtextsize.style.fontSize = `0px`
+                ctx.beginPath();
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                ctx.font = `${lwinput.value}px serif`;
+                ctx.fillText(textinput.value, x2,y2 + parseFloat(lwinput.value) - 1)
+                ctx.stroke();
+                text=false
+           }
+            drawing = false
+        
+        });
+
+    function drawLine(x1, y1, xp2, yp2){
+        ctx.beginPath();
+        ctx.lineWidth = lwinput.value;
+        ctx.strokeStyle = color;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(xp2, yp2);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    function drawcircle(x1, y1, xp2, yp2){
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color
+        ctx.arc(x1, y1, lwinput.value/2, 0, 2 * Math.PI, false);
+        ctx.fill()
+        ctx.stroke();
+    }
+   
+
+    </script>
+</html>

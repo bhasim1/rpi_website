@@ -1,0 +1,70 @@
+@import "variabels";
+@import "defaultcss";
+@import "navbar";
+
+li {
+  font-size: $text-300;
+}
+
+canvas {
+  border: 3px solid black;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border-radius: 5px;
+}
+
+.flex-container > div{
+  max-width: 30vw;
+  min-width: 30vw;
+}
+
+//todo
+
+
+#todo > ul {
+  background-color: $darkgrey;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.firsttodolist {
+  background-color: $darkgrey !important;
+  font-size: $text-800;
+}
+
+.list-group-item {
+  list-style-type: none;
+  padding: $text-10;
+  font-size: $text-300;
+}
+
+.list-group{
+  border: $text-25 solid $pink;
+  border-radius: 5px;
+}
+.specialstuffasdf, .place {
+  @include center;
+}
+
+.changetodolist {
+  font-size: $text-500;
+  display: flex;
+  flex-direction: column;
+
+}
+
+#out {
+  max-height: 20vh
+}
+
+.timeset {
+  @include center;
+  background-color: $yellow;
+  font-size: $text-500;
+  text-align: center;
+  width: 40ch;
+  border: 3px solid $darkgrey;
+  border-radius: $text-100;
+}
+

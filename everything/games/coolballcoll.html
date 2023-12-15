@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ball</title>
+  </head>
+  <body>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        text-align: center;
+        overflow: hidden;
+      }
+      canvas {
+        margin: 0;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+    <canvas></canvas>
+
+    <script defer>
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.canvas.width = window.innerWidth;
+      ctx.canvas.height = window.innerHeight;
+
+      var cw = canvas.width;
+      var ch = canvas.height;
+
+      var rainbowcolor = 0;
+      var ratio = 1.05;
+
+      var balls = [];
+
+      for (let index = 0; index < Math.floor(Math.random() * 1 + 5); index++) {
+        addball();
+      }
+
+      function addball() {
+        radius = Math.floor(Math.random() * 75 + 20);
+        posx = Math.floor(Math.random() * (cw - radius * 2)) + radius;
+        posy = Math.floor(Math.random() * (ch - radius * 2)) + radius;
+        balls.push([
+          posx,
+          posy,
+          Math.floor(Math.random() * 10 + 1) - 5,
+          Math.floor(Math.random() * 10 + 1) - 5,
+          radius,
+          "red",
+        ]);
+      }
+
+      function animate() {
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${rainbowcolor} , 50%, 50%, 0.25)`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fill();
+        ctx.closePath();
+        for (let index = 0; index < balls.length; index++) {
+          ctx.beginPath();
+          const ball = balls[index];
+
+          for (let ind = 0; ind < balls.length; ind++) {
+            const element = balls[ind];
+            console.log(ball, element);
+            let radiusaddition = ball[4] + element[4];
+
+            const distance = Math.abs(
+              Math.floor(
+                Math.sqrt(
+                  (ball[0] - element[0]) * (ball[0] - element[0]) +
+                    (ball[1] - element[1]) * (ball[1] - element[1])
+                )
+              )
+            );
+            // console.log(distance, radiusaddition, distance > radiusaddition);
+            if (distance > radiusaddition) {
+              ball[5] = "green";
+              element[5] = "green";
+            } else {
+              ball[5] = "red";
+              element[5] = "red";
+            }
+          }
+          if (ball[0] + ball[4] > cw || ball[0] - ball[4] < 0) {
+            ball[2] = -ball[2];
+          }
+          if (ball[1] + ball[4] > ch || ball[1] - ball[4] < 0) {
+            ball[3] = -ball[3];
+          }
+          ball[0] += ball[2];
+          ball[1] += ball[3];
+          ctx.fillStyle = ball[5];
+          ctx.arc(ball[0], ball[1], ball[4], 0, Math.PI * 2);
+
+          ctx.fill();
+          ctx.closePath();
+        }
+
+        rainbowcolor++;
+        requestAnimationFrame(animate);
+      }
+      animate();
+    </script>
+  </body>
+</html>

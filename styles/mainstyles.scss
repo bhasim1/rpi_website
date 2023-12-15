@@ -1,0 +1,149 @@
+@import "variabels";
+@import "defaultcss";
+@import "navbar";
+@import "animations";
+
+#icon {
+    object-fit: contain;
+    background-color: $darkgrey;
+    border: 3px solid $darkgrey;
+    border-radius: 5px;
+    height: 5rem !important;
+    width: auto !important;
+    margin: 10px;
+    float: right;
+}
+
+.colp{
+    width: 33vw;
+    }
+    
+@media screen and (max-width: 1100px) {
+    .colp {
+        width: 100vw;
+        margin: 0;
+    }
+    .hideatobig{
+        display: none;
+    }
+}
+
+.portfolio1{
+    border: 3px solid $darkgrey;
+    border-radius: 5px;
+    height: auto;
+    margin: 50px;
+    background-size: 600% 600%;
+    background-image: linear-gradient(-45deg, rgb(204, 204, 204), rgb(182, 180, 180), rgb(158, 157, 157), rgb(129, 129, 129)  );
+    background-position: -2px 0;
+    animation: gradiantanimate 12s linear infinite alternate;
+    box-shadow: 12px 12px 6px $darkgrey;
+    font-size: 2.2rem;
+    min-height: 55rem;
+    img{
+        @include center;
+        object-fit: contain;
+        max-height: 50rem;
+        height: 40rem !important;
+        padding: 1rem;
+        width: auto;
+        border: 3px solid var(--darkgrey);
+        border-radius: 5px;
+    }
+
+}
+
+.portfolio2{
+    border: 3px solid $darkgrey;
+    border-radius: 5px;
+    height: auto;
+    margin: 50px;
+    background-size: 600% 600%;
+    background-image: linear-gradient(-45deg, lighten($grey, 10%), $grey, darken($grey, 10%), $darkgrey, darken($darkgrey, 10%));
+    background-position: -2px 0;
+    animation: gradiantanimate 12s linear infinite alternate;
+    box-shadow: 12px 12px 6px $darkgrey;
+    font-size: 2.2rem;
+    min-height: 55rem;
+    max-height: 59rem;
+    img{
+        @include center;
+        object-fit: contain;
+        max-height: 10rem;
+        height: 100% !important;
+        padding: 1rem;
+        background-color: white;
+        width: 10rem;
+        border: 3px solid var(--darkgrey);
+        border-radius: 5px;
+    }
+    table{
+        width: 100%;
+        table-layout: fixed;
+        overflow-wrap: break-word;
+     }
+    
+    #p1{
+        background-color: #e4a126e4;
+        font-weight: bold;
+        font-size: 2rem;
+        border: 3px solid #ac791ce4;
+    }
+    #p2{
+        background-color: #264de4;
+        font-weight: bold;
+        font-size: 2rem;
+        border: 3px solid #1c359b;
+    }
+    #p3{
+        background-color: #e75000;
+        font-weight: bold;
+        font-size: 2rem;
+        border: 3px solid #9e3700;
+    }
+    #p4{
+        background-color: #0868ac;
+        font-weight: bold;
+        font-size: 2rem;
+        border: 3px solid #05436e;
+    }
+    #p5{
+        background-color: #8094d2;
+        font-weight: bold;
+        font-size: 2rem;
+        border: 3px solid #57658f;
+    }
+    
+    #p1:hover, #p2:hover,#p3:hover,#p4:hover,#p5:hover{
+    transform: scale(1.04);
+    }
+}
+
+.portfolio2 img{
+    object-fit: contain;
+    max-height: 10rem;
+    height: 100% !important;
+    padding: 1rem;
+    background-color: white;
+    width: 10rem;
+    border: 3px solid var(--darkgrey);
+    border-radius: 5px;
+}
+
+#thumbnailimg{
+    object-fit: contain;
+    max-height: 50rem;
+    height: 40rem !important;
+    padding: 1rem;
+    width: auto;
+    border: 3px solid var(--darkgrey);
+    border-radius: 5px;
+}
+
+.flex-container-space-around {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    background-color: black;
+    width: 100vw;
+}

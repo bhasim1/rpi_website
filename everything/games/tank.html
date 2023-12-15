@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0%;
+      overflow: hidden;
+    }
+  </style>
+  <body>
+    <canvas></canvas>
+    <script>
+      const canvas = document.querySelector("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext("2d");
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      let difficulty = 10;
+      var loaded = 0;
+      const loadmax = 3;
+      var playersprite = new Image();
+      playersprite.onload = function () {
+        loaded += 1;
+        if (loaded === loadmax) {
+          animate();
+        }
+      };
+      playersprite.src = "./tank.svg";
+      var rocktsprite = new Image();
+      rocktsprite.onload = function () {
+        loaded += 1;
+        if (loaded === loadmax) {
+          animate();
+        }
+      };
+      rocktsprite.src = "./rocket.svg";
+      var bulletsprite = new Image();
+      bulletsprite.onload = function () {
+        loaded += 1;
+        if (loaded === loadmax) {
+          animate();
+        }
+      };
+      bulletsprite.src = "./bullet.svg";
+      function randomhsl() {
+        return `hsl(${Math.round(Math.random() * 360)}, 50%, 50%)`;
+      }
+      class enemy {
+        constructor(x, y, radius, color, vx, vy) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.color = color;
+          this.vx = vx;
+          this.vy = vy;
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.fillStyle = this.color;
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.closePath();
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.draw();
+        }
+      }
+
+      class players {
+        constructor(x, y, radius, color, vx, vy) {
+          this.lives = 100;
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.color = color;
+          this.vx = vx;
+          this.vy = vy;
+          this.projectiles = [];
+          this.rockets = [];
+          this.handleinput();
+          this.radian = 0;
+        }
+        draw(radian) {
+          if (radian == undefined) {
+            ctx.beginPath();
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.radian);
+            if (!started) {
+              ctx.fillStyle = "rgba(0,0,0,0.3)";
+              ctx.fillRect(0 - cw / 32, 0 - cw / 32, cw / 16, cw / 16);
+            }
+            ctx.drawImage(
+              playersprite,
+              0 - cw / 32,
+              0 - cw / 32,
+              cw / 16,
+              cw / 16
+            );
+
+            ctx.restore();
+            ctx.closePath();
+          } else {
+            this.radian = radian;
+            ctx.beginPath();
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(radian);
+            if (!started) {
+              ctx.fillStyle = "rgba(0,0,0,0.3)";
+              ctx.fillRect(0 - cw / 32, 0 - cw / 32, cw / 16, cw / 16);
+            }
+            ctx.drawImage(
+              playersprite,
+              0 - cw / 32,
+              0 - cw / 32,
+              cw / 16,
+              cw / 16
+            );
+            ctx.restore();
+            ctx.closePath();
+          }
+        }
+        displaylives() {
+          ctx.beginPath();
+          ctx.fillStyle = "white";
+          ctx.font = "3rem monospace";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "top";
+          ctx.fillText("LIVES: " + this.lives, 10, 10);
+          ctx.fill();
+          ctx.closePath();
+        }
+        displaydifficulty() {
+          ctx.beginPath();
+          ctx.fillStyle = "white";
+          ctx.font = "3rem monospace";
+          ctx.textAlign = "right";
+          ctx.textBaseline = "top";
+          ctx.fillText("DIFFICULTY: " + (difficulty - 9), cw - 10, 10);
+          ctx.fill();
+          ctx.closePath();
+        }
+        handleinput() {
+          window.addEventListener("click", (e) => {
+            this.shoot(e.clientX, e.clientY);
+          });
+          window.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            this.shootrocket(e.clientX, e.clientY);
+          });
+
+          window.addEventListener("mousemove", (e) => {
+            const radian = Math.atan2(e.clientY - ch / 2, e.clientX - cw / 2);
+            this.radian = radian;
+            this.draw(radian);
+          });
+        }
+        shoot(x, y) {
+          const speedup = 5;
+          const angle = Math.atan2(y - ch / 2, x - cw / 2);
+          const vx = Math.cos(angle) * speedup;
+          const vy = Math.sin(angle) * speedup;
+          this.projectiles.push({ x: cw / 2, y: ch / 2, vx: vx, vy: vy });
+        }
+        shootrocket(x, y) {
+          const speedup = 2;
+          const angle = Math.atan2(y - ch / 2, x - cw / 2);
+          const vx = Math.cos(angle) * speedup;
+          const vy = Math.sin(angle) * speedup;
+          this.rockets.push({ x: cw / 2, y: ch / 2, vx: vx, vy: vy });
+        }
+        drawprot() {
+          for (let index = 0; index < this.projectiles.length; index++) {
+            const element = this.projectiles[index];
+            if (
+              element.x + this.radius < 0 ||
+              element.x - this.radius > cw ||
+              element.y + this.radius < 0 ||
+              element.y - this.radius > ch
+            ) {
+              this.projectiles.splice(index, 1);
+            }
+            ctx.beginPath();
+            ctx.save();
+            ctx.translate(element.x, element.y);
+            ctx.rotate(Math.atan2(element.vy, element.vx));
+            ctx.drawImage(bulletsprite, cw / 32 - 5, -10, cw / 100, cw / 100);
+
+            ctx.restore();
+            ctx.closePath();
+
+            element.x += element.vx;
+            element.y += element.vy;
+          }
+        }
+        drawrocket() {
+          for (let index = 0; index < this.rockets.length; index++) {
+            const element = this.rockets[index];
+            if (
+              element.x + this.radius < 0 ||
+              element.x - this.radius > cw ||
+              element.y + this.radius < 0 ||
+              element.y - this.radius > ch
+            ) {
+              this.rockets.splice(index, 1);
+            }
+            ctx.beginPath();
+            ctx.save();
+            ctx.translate(element.x, element.y);
+            ctx.rotate(Math.atan2(element.vy, element.vx));
+            ctx.drawImage(rocktsprite, -cw / 48, -cw / 64, cw / 32, cw / 32);
+
+            ctx.restore();
+            ctx.closePath();
+
+            element.x += element.vx;
+            element.y += element.vy;
+          }
+        }
+        rocketexplode(x, y) {
+          particel(x, y, undefined, "red", 20, 20, 15, 20);
+          for (let enindex = 0; enindex < enemyels.length; enindex++) {
+            const en = enemyels[enindex];
+            if (Math.hypot(x - en.x, y - en.y) < en.radius + cw / 12) {
+              ctx.beginPath();
+              ctx.fillStyle = "blue";
+              ctx.arc(x, y, en.radius + cw / 12, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.closePath();
+              enemyels.splice(enindex, 1);
+              difficulty += 0.5;
+              ctx.beginPath();
+              particel(en.x, en.y, undefined, undefined, 30, 30, 15, 5);
+
+              ctx.closePath();
+            }
+          }
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.drawprot();
+          this.draw();
+          this.drawrocket();
+          this.displaylives();
+          this.displaydifficulty();
+        }
+      }
+      const player = new players(cw / 2, ch / 2, 20, "white", 0, 0);
+
+      const ballels = [];
+      const enemyels = [];
+      let enemyinterval;
+      let animationvar;
+      const particels = [];
+      function particel(x, y, radius, color, amount, ramount, speed, size) {
+        let a;
+        if (amount == undefined) {
+          a = 30;
+        } else {
+          a = amount;
+        }
+        let ra;
+        if (ramount == undefined) {
+          ra = 50;
+        } else {
+          ra = amount;
+        }
+        ctx.beginPath();
+        for (
+          let index = 0;
+          index < Math.floor(Math.random() * ra + a);
+          index++
+        ) {
+          let c;
+          if (color == undefined) {
+            c = randomhsl();
+          } else {
+            c = color;
+          }
+          let s = speed;
+          if (speed == undefined) {
+            s = 15;
+          }
+          let si = size;
+          if (size == undefined) {
+            si = 15;
+          }
+
+          const vx = Math.random() * s - s / 2;
+          const vy = Math.random() * s - s / 2;
+          let r;
+          if (radius == undefined) {
+            r = Math.random() * si * 3 + si * 2;
+          } else {
+            r = radius;
+          }
+
+          particels.push({ x: x, y: y, vx: vx, vy: vy, color: c, radius: r });
+        }
+        ctx.closePath();
+      }
+
+      function handlelose() {
+        cancelAnimationFrame(animationvar);
+        clearTimeout(enemyinterval);
+        difficulty = 10;
+        ctx.fillStyle = "rgba(0,0,0,1)";
+        ctx.fillRect(0, 0, cw, ch);
+        player.update();
+        ctx.beginPath();
+        ctx.fillStyle = "white";
+        ctx.font = "5rem monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText("you lost press: 'r' to Retry", cw / 2, 50);
+        ctx.fill();
+        ctx.closePath();
+        window.onkeypress = (e) => {
+          if (e.key === "r" || e.key === "R") {
+            enemyels.splice(0, enemyels.length);
+            player.projectiles.splice(0, player.projectiles.length);
+            player.rockets.splice(0, player.rockets.length);
+            player.lives = 100;
+            started = false;
+            animate();
+          }
+          window.onkeypress = "";
+        };
+      }
+
+      function stopgame() {
+        cancelAnimationFrame(animationvar);
+        clearTimeout(enemyinterval);
+      }
+      function startenemyspawn() {
+        enemyinterval = setTimeout(() => {
+          let x;
+          let y;
+          let radius = (Math.random() * 40 * difficulty) / 50 + 10;
+
+          if (Math.random() < 0.5) {
+            x = Math.random() < 0.5 ? 0 - radius : cw + radius;
+            y = Math.random() * ch;
+          } else {
+            y = Math.random() < 0.5 ? 0 - radius : ch + radius;
+            x = Math.random() * cw;
+          }
+          const angle = Math.atan2(ch / 2 - y, cw / 2 - x);
+          const vx = Math.cos(angle) * (difficulty / 10);
+          const vy = Math.sin(angle) * (difficulty / 10);
+          // console.log(x, y, radius, randomhsl(), vx, vy);
+          const e = new enemy(x, y, radius, randomhsl(), vx, vy);
+          enemyels.push(e);
+          setTimeout(startenemyspawn, 20);
+        }, 20000 / difficulty);
+      }
+
+      let started = false;
+      let lasttime = 0;
+      function animate() {
+        if (started) {
+          lasttime = performance.now();
+          ctx.fillStyle = "rgba(0,0,0,0.3)";
+          ctx.fillRect(0, 0, cw, ch);
+
+          //draw enemys
+
+          for (let index = 0; index < enemyels.length; index++) {
+            const element = enemyels[index];
+            if (
+              element.x + element.radius < 0 ||
+              element.x - element.radius > cw ||
+              element.y + element.radius < 0 ||
+              element.y - element.radius > ch
+            ) {
+              enemyels.splice(index, 1);
+            }
+            element.update();
+          }
+
+          //draw particels
+
+          for (let index = 0; index < particels.length; index++) {
+            const element = particels[index];
+            if (particels[index].radius < 3) {
+              particels.splice(index, 1);
+            } else {
+              ctx.beginPath();
+              ctx.fillStyle = element.color;
+              ctx.arc(element.x, element.y, element.radius, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.closePath();
+              particels[index].x += particels[index].vx;
+              particels[index].y += particels[index].vy;
+              particels[index].radius = particels[index].radius * 0.9;
+            }
+          }
+
+          player.update();
+
+          //colcheck player - enemy
+
+          for (let enindex = 0; enindex < enemyels.length; enindex++) {
+            const en = enemyels[enindex];
+            if (
+              Math.hypot(player.x - en.x, player.y - en.y) <
+              en.radius + player.radius
+            ) {
+              player.lives = (player.lives - en.radius).toFixed(0);
+              enemyels.splice(enindex, 1);
+              difficulty -= 1;
+              if (player.lives <= 0) {
+                setTimeout(handlelose, 0);
+                return;
+              }
+            }
+          }
+
+          //colchec protjectile - enemy
+
+          for (let enindex = 0; enindex < enemyels.length; enindex++) {
+            const en = enemyels[enindex];
+            for (
+              let protindex = 0;
+              protindex < player.projectiles.length;
+              protindex++
+            ) {
+              const prot = player.projectiles[protindex];
+              if (
+                Math.hypot(
+                  prot.x + prot.vx * 10 - en.x,
+                  prot.y + prot.vy * 10 - en.y
+                ) <
+                en.radius + cw / 100
+              ) {
+                particel(
+                  prot.x + prot.vx * 10,
+                  prot.y + prot.vy * 10,
+                  undefined,
+                  undefined,
+                  20,
+                  20,
+                  8,
+                  5
+                );
+                player.projectiles.splice(protindex, 1);
+                difficulty += 0.5;
+                if (en.radius > 15) {
+                  enemyels[enindex].radius -= 5;
+                } else {
+                  enemyels.splice(enindex, 1);
+                }
+              }
+            }
+          }
+          //colchec rocket - enemy
+
+          for (let enindex = 0; enindex < enemyels.length; enindex++) {
+            const en = enemyels[enindex];
+            for (
+              let protindex = 0;
+              protindex < player.rockets.length;
+              protindex++
+            ) {
+              const prot = player.rockets[protindex];
+              if (
+                Math.hypot(
+                  prot.x - prot.vx * 25 - en.x,
+                  prot.y - prot.vy * 25 - en.y
+                ) <
+                en.radius + cw / 32
+              ) {
+                player.rocketexplode(
+                  prot.x - prot.vx * 25,
+                  prot.y - prot.vy * 25
+                );
+                if (en.radius > 15 && typeof enemyels[enindex] != "undefined") {
+                  enemyels[enindex].radius -= 5;
+                } else {
+                  enemyels.splice(enindex, 1);
+                }
+                player.rockets.splice(protindex, 1);
+              }
+            }
+          }
+
+          animationvar = requestAnimationFrame(animate);
+          // console.log(lasttime - performance.now());
+        } else {
+          ctx.fillStyle = "rgba(0,0,0,1)";
+          ctx.fillRect(0, 0, cw, ch);
+          player.update();
+          ctx.beginPath();
+          ctx.fillStyle = "white";
+          ctx.font = "5rem monospace";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          ctx.fillText("click to start", cw / 2, 10);
+          ctx.fill();
+          ctx.closePath();
+          canvas.onclick = function () {
+            started = true;
+            animate();
+            startenemyspawn();
+            canvas.onclick = "";
+            ctx.fillStyle = "rgba(0,0,0,1)";
+            ctx.fillRect(0, 0, cw, ch);
+          };
+        }
+      }
+    </script>
+  </body>
+</html>

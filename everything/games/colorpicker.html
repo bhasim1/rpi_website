@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <div class="center">
+      <label for="color">enter valid rgb/hex/hsl or name</label>
+      <input type="text" name="color" id="color" value="" />
+      <label for="colorin">or choose one</label>
+      <input type="color" name="colorin" id="colorin" value="" />
+    </div>
+    <script>
+      const canvas = document.querySelector("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext("2d");
+
+      function fillcanvas(value) {
+        ctx.beginPath();
+
+        ctx.fillStyle = value;
+
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.closePath();
+      }
+
+      function hexToRgb(h) {
+        let r = 0,
+          g = 0,
+          b = 0;
+
+        // 3 digits
+        if (h.length == 4) {
+          r = "0x" + h[1] + h[1];
+          g = "0x" + h[2] + h[2];
+          b = "0x" + h[3] + h[3];
+
+          // 6 digits
+        } else if (h.length == 7) {
+          r = "0x" + h[1] + h[2];
+          g = "0x" + h[3] + h[4];
+          b = "0x" + h[5] + h[6];
+        }
+
+        return "rgb(" + +r + "," + +g + "," + +b + ")";
+      }
+
+      const input = document.querySelector("#color");
+      input.value = "";
+      input.addEventListener("keyup", (e) => {
+        console.log(e);
+        fillcanvas(input.value);
+        colorinput.value = input.value;
+      });
+
+      const colorinput = document.querySelector("#colorin");
+      colorinput.value = "";
+      colorinput.addEventListener("change", (e) => {
+        console.log(e);
+        fillcanvas(colorinput.value);
+        input.value = colorinput.value + "/" + hexToRgb(colorinput.value);
+      });
+    </script>
+    <style>
+      :root {
+        --roundin: 10px;
+        --color: rgb(4, 4, 4);
+        --textcolor: rgb(255, 255, 255);
+        --backroundcolor: rgba(0, 0, 0, 0.505);
+        --bordercolor: rgb(0, 0, 0);
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background-color: var(--backroundcolor);
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      canvas {
+        background-color: var(--backroundcolor);
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border: 5px black solid;
+        border-radius: 5px;
+        cursor: crosshair;
+        z-index: -1;
+      }
+
+      h1,
+      #retry,
+      input,
+      #reset,
+      label,
+      #countdown {
+        max-width: 28ch;
+        min-width: 28ch;
+        background-color: var(--backroundcolor);
+        color: var(--textcolor);
+        font-size: 2rem;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin: 1rem;
+        border: 5px var(--bordercolor) solid;
+        border-radius: 5px;
+      }
+
+      input[type="color"] {
+        min-width: 3ch;
+        min-height: 3ch;
+      }
+      label,
+      input {
+        width: fit-content;
+      }
+      button {
+        cursor: pointer;
+      }
+      .center {
+        position: absolute;
+        top: 0;
+        left: 0;
+        grid-template-columns: auto;
+        grid-template-rows: 80px 100px;
+        display: grid;
+        gap: 10px 20px;
+        justify-content: center;
+        align-content: center;
+        height: 100vh;
+        width: 100vw;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="mascot">
+      <div class="overlap">
+        <img id="baseface" src="./baseface.svg" />
+        <img id="eye1" src="./eye.svg" />
+        <img id="eye2" src="./eye.svg" />
+      </div>
+    </div>
+    <style>
+      :root {
+        --facesize: 8vw;
+      }
+      * {
+        outline: 3px solid rebeccapurple;
+        box-sizing: border-box;
+      }
+      .overlap {
+        width: max-content;
+        max-width: var(--facesize);
+        height: max-content;
+        max-height: var(--facesize);
+        position: relative;
+      }
+      .overlap #beseface {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .overlap #eye1 {
+        position: absolute;
+        top: 40%;
+        left: 33%;
+        width: 3vw;
+      }
+      .overlap #eye2 {
+        position: absolute;
+        top: 40%;
+        left: 85%;
+        width: 3vw;
+      }
+    </style>
+    <script defer>
+      const eyes = document.querySelectorAll(".overlap img:not(#baseface)");
+      window.addEventListener("mousemove", (e) => {
+        eyes.forEach((el) => {
+          const angle = Math.atan2(
+            -(e.clientY - el.getBoundingClientRect().y),
+            -(e.clientX - el.getBoundingClientRect().x)
+          );
+          el.style.transform = "rotate(" + angle + "rad)";
+          if (
+            Math.hypot(
+              e.clientY - el.getBoundingClientRect().y,
+              e.clientX - el.getBoundingClientRect().x
+            ) <
+            (window.innerHeight / window.innerWidth) * 1000
+          ) {
+            console.log("close");
+            document.querySelectorAll(".mascot").forEach((el) => {
+              el.style.transform = "translate(0rem -2rem)";
+            });
+          } else {
+            document.querySelectorAll(".mascot").forEach((el) => {
+              el.style.transform = "translate(0rem 0rem)";
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

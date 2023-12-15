@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+      <!-- CSS only -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+      <!-- JavaScript Bundle with Popper -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+</head>
+<style>
+div{
+    width: 50vw;
+    height: 50vh;
+    background-color: black;
+    transform: skew();
+    margin-top: 25vh;
+    margin-left: 25vw;
+}
+ </style>
+<body>
+<div></div>
+</body>
+<script defer>
+const div = document.querySelector("div")
+
+var skewx
+var skewy
+var clientrect = div.getBoundingClientRect()
+
+div.addEventListener("mousemove", skewdiv)
+
+function skewdiv(e){
+    offsetx = e.offsetX
+    offsety = e.offsetY
+    skewx = clientrect.width / offsetx
+    skewy = clientrect.height / offsety
+    if(offsetx < clientrect.width/2){
+        skewx = -skewx
+    }
+    if(offsety < clientrect.height/2){
+        skewy = -skewy
+    }
+    console.log(skewx)
+   div.style.transform = `skew(${skewx}deg,${skewy}deg)`
+}
+</script>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>cool</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+      integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      text-align: center;
+      overflow: hidden;
+    }
+    canvas {
+      border: 3px solid black;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+      border-radius: 5px;
+      background-color: rgb(199, 199, 199);
+      height: 100vh;
+      width: 100vh;
+    }
+  </style>
+  <body>
+    <canvas></canvas>
+  </body>
+  <script defer>
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const player = new Image(64, 64);
+    player.src = "./ewok.png";
+
+    const tree = new Image(512, 512);
+    tree.src = "./tree.png";
+
+    ctx.canvas.width = 512 + 256; ///4;
+    ctx.canvas.height = 512 + 256; //-100;
+
+    var cw = canvas.width;
+    var ch = canvas.height;
+    var vx = 0;
+    var vy = 0;
+    var gravity = 0;
+    var scl = 64;
+    var vector = 10;
+    var rainbowcolor = 0;
+    var rainbowcolorball = rainbowcolor + 128;
+    var circle;
+    var up = false;
+    var down = false;
+    var left = false;
+    var right = false;
+    var levitate = false;
+    var x1 = cw / 2 - scl / 2;
+    var y1 = ch - scl;
+    var x2 = scl;
+    var y2 = scl;
+    var active = 0;
+    var score = 0;
+    var length = 2;
+    var fail = false;
+    var row = 1;
+
+    var grounded = true;
+    var boxcol = false;
+
+    var f;
+    var col = 0;
+    var mirror = 1;
+    var goodboxcollength = 0;
+
+    const boxes = [];
+    const collactable = [];
+    const goodboxcol = [];
+
+    var collectablepicked;
+
+    player.onload = animate();
+
+    document.onkeydown = checkKey;
+    document.onkeyup = resetKey;
+
+    function checkKey(e) {
+      e.preventDefault();
+      if (e.keyCode == "38") {
+        up = true;
+        active = 1;
+      } else if (e.keyCode == "40") {
+        down = true;
+        active = 2;
+      } else if (e.keyCode == "37") {
+        left = true;
+        active = 3;
+      } else if (e.keyCode == "39") {
+        right = true;
+        active = 4;
+      } else if (e.keyCode == "32") {
+        levitate = true;
+      }
+    }
+
+    function resetKey(e) {
+      e.preventDefault();
+      if (e.keyCode == "32") {
+        levitate = false;
+      }
+    }
+
+    boxes.push([
+      {
+        x: 256,
+        y: ch - 265,
+        width: 10,
+        height: 265,
+        color: "black",
+        col: "x",
+      },
+    ]);
+
+    boxes.push([
+      {
+        x: 650,
+        y: 700,
+        width: 100,
+        height: 100,
+        color: "red",
+        col: "y",
+      },
+    ]);
+
+    boxes.push([
+      {
+        x: 600,
+        y: 500,
+        width: 100,
+        height: 100,
+        color: "red",
+        col: "y",
+      },
+    ]);
+
+    boxes.push([
+      {
+        x: 106,
+        y: ch - 265,
+        width: 150,
+        height: 10,
+        color: "black",
+        col: "y",
+      },
+    ]);
+
+    boxes.push([
+      {
+        x: 265,
+        y: 600,
+        width: 200,
+        height: 10,
+        color: "orange",
+        col: "y",
+      },
+    ]);
+
+    boxes.push([
+      {
+        x: cw / 2,
+        y: ch / 2,
+        width: 200,
+        height: 10,
+        color: "yellow",
+        col: "y",
+      },
+    ]);
+
+    collactable.push([
+      {
+        x: 200,
+        y: ch - 265 - 40,
+        radius: 20,
+      },
+    ]);
+
+    collactable.push([
+      {
+        x: cw - 30,
+        y: 650,
+        radius: 20,
+      },
+    ]);
+    collactable.push([
+      {
+        x: cw / 2,
+        y: ch / 2 - 100,
+        radius: 20,
+      },
+    ]);
+
+    goodboxcol.push([
+      {
+        x: cw / 2,
+        y: ch / 2,
+      },
+    ]);
+
+    collectablepicked = Math.floor(Math.random() * collactable.length);
+
+    function animate() {
+      //keypress
+      if (up === true) {
+        active === 1;
+      } else if (left === true) {
+        left = false;
+        mirror = 1;
+        x1 -= 4;
+        active === 3;
+      } else if (right === true) {
+        right = false;
+        mirror = -1;
+        x1 += 4;
+        active === 4;
+      }
+
+      if (levitate === true && vy >= 0) {
+        vy = vy / 5;
+        console.log("levitate");
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = "hsla(0,0%,40%,0.3)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fill();
+      ctx.drawImage(tree, 0, 0, 512, 512, 0, ch - 256, 256, 256);
+
+      //boxes
+      for (let index = 0; index < boxes.length; index++) {
+        ctx.beginPath();
+        ctx.fillStyle = boxes[index][0].color;
+        ctx.rect(
+          boxes[index][0].x,
+          boxes[index][0].y,
+          boxes[index][0].width,
+          boxes[index][0].height
+        );
+        ctx.fill();
+        ctx.stroke();
+        if (
+          boxes[index][0].col === "y" &&
+          boxes[index][0].x < x1 + scl &&
+          boxes[index][0].x + boxes[index][0].width > x1 &&
+          boxes[index][0].y < y1 + scl &&
+          boxes[index][0].y + boxes[index][0].height > y1
+        ) {
+          vy = -vy;
+          grounded = true;
+          boxcol = true;
+        } else if (
+          boxes[index][0].col === "x" &&
+          boxes[index][0].x < x1 + scl &&
+          boxes[index][0].x + boxes[index][0].width > x1 &&
+          boxes[index][0].y < y1 + scl &&
+          boxes[index][0].y + boxes[index][0].height > y1
+        ) {
+          vx = -vx;
+          grounded = true;
+          boxcol = true;
+        }
+        if (y1 + scl > ch) {
+        } else if (boxcol === false && grounded === true) {
+          gravity = 0.1;
+          grounded = false;
+        }
+        if (
+          boxes[index][0].x < x1 + scl &&
+          boxes[index][0].x + boxes[index][0].width > x1 &&
+          boxes[index][0].y < y1 + scl &&
+          boxes[index][0].y + boxes[index][0].height > y1
+        ) {
+          gravity = 0;
+          vy = 0;
+          grounded = true;
+        }
+      }
+      goodboxcollength = goodboxcol.length;
+
+      //col
+      if (y1 + scl > ch) {
+        vy = 0;
+        gravity = 0;
+        grounded = true;
+      }
+      if (grounded === true && up === true) {
+        vy = -6;
+        gravity = 0.1;
+        grounded = false;
+        up = false;
+      }
+      y1 += vy += gravity;
+
+      //collectable
+      if (collactable.length >= 1) {
+        ctx.beginPath();
+        ctx.fillStyle = `hsl(${rainbowcolor},50%,50%)`;
+        ctx.arc(
+          collactable[collectablepicked][0].x,
+          collactable[collectablepicked][0].y,
+          30,
+          Math.PI * 2,
+          false
+        );
+        ctx.fill();
+        ctx.stroke();
+        if (
+          collactable[collectablepicked][0].x < x1 + scl &&
+          collactable[collectablepicked][0].x +
+            collactable[collectablepicked][0].radius >
+            x1 &&
+          collactable[collectablepicked][0].y < y1 + scl &&
+          collactable[collectablepicked][0].y +
+            collactable[collectablepicked][0].radius >
+            y1
+        ) {
+          newcollectablepos();
+        }
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = "white";
+      ctx.save();
+      ctx.scale(mirror, 1);
+      if (mirror === 1) {
+        ctx.drawImage(player, 0, 0, scl, scl, x1, y1, scl, scl);
+      } else if (mirror === -1) {
+        ctx.drawImage(player, 0, 0, scl, scl, -x1 - scl, y1, scl, scl);
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.restore();
+      ctx.closePath();
+
+      rainbowcolor += 2;
+      if (rainbowcolor >= 255) {
+        rainbowcolor = 0;
+      }
+      goodboxcol.push([{ x: x1, y: y1 }]);
+      requestAnimationFrame(animate);
+    }
+
+    function newcollectablepos() {
+      collectablepicked = Math.floor(Math.random() * collactable.length);
+    }
+  </script>
+</html>

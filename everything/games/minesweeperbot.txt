@@ -1,0 +1,5 @@
+1.win a game 50/50
+2.no random
+3. if 1 is in corner mark corner
+4 if 1 has 1 save bomb remove 3x3
+

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="64mm"
+   height="64mm"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg5"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="fill:#666666;stroke:#000000;stroke-width:0.264583"
+       id="path163"
+       cx="32"
+       cy="32"
+       r="24" />
+    <path
+       style="fill:#f9f9f9;stroke:#000000;stroke-width:0.264583"
+       id="path438"
+       sodipodi:type="arc"
+       sodipodi:cx="32"
+       sodipodi:cy="40"
+       sodipodi:rx="16"
+       sodipodi:ry="10"
+       sodipodi:start="0"
+       sodipodi:end="3.14"
+       sodipodi:arc-type="slice"
+       d="M 48,40 A 16,10 0 0 1 32.012741,49.999997 16,10 0 0 1 16.00002,40.015927 L 32,40 Z" />
+  </g>
+</svg>

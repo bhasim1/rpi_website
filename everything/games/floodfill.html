@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas></canvas>
+    <br>
+    <button onclick="generatemap()">make new map</button>
+    <button onclick="precise()">precise</button>
+    <input type="text" id="accuracy" />
+
+    <script>
+      "use strict";
+      const canvas = document.querySelector("canvas");
+      canvas.width = 720;
+      canvas.height = 720;
+      const ctx = canvas.getContext("2d");
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      let loopsize = 40;
+      const accuracy = document.getElementById("accuracy");
+      accuracy.value = loopsize;
+      let scl = cw / loopsize;
+
+      let map = [];
+
+      function generatemap() {
+        loopsize = parseInt(accuracy.value);
+        scl = cw / loopsize
+        map = [];
+        ctx.clearRect(0, 0, cw, ch);
+        //generate map
+        console.log(loopsize);
+        for (let index = 0; index < loopsize; index++) {
+          const innermap = [];
+          for (let i = 0; i < loopsize; i++) {
+            let r = Math.floor(Math.random() * 3);
+
+            if (r === 0) {
+              innermap.push(1);
+            } else {
+              innermap.push(0);
+            }
+          }
+          map.push(innermap);
+        }
+        //draw map
+        map.forEach((element, index) => {
+          element.forEach((el, i) => {
+            if (!!el) {
+              ctx.beginPath();
+              ctx.rect(i * scl, index * scl, scl, scl);
+              ctx.fill();
+              ctx.closePath();
+            }
+          });
+        });
+      }
+
+      function precise() {
+        for (let index = 0; index < map.length; index++) {
+          for (let i = 0; i < map[index].length; i++) {
+            let heat = 0;
+            let current = map[index][i];
+
+            //check if element is 0 cause i want to add more
+            if (!current) {
+              //check for corners
+              if (
+                i - 1 > 0 &&
+                index - 1 > 0 &&
+                i + 1 < loopsize &&
+                index + 1 < loopsize
+              ) {
+                if (!!map[index][i - 1]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i - 1]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i]) {
+                  heat += 1;
+                }
+                if (!!map[index - 1][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i + 1]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i]) {
+                  heat += 1;
+                }
+                if (!!map[index + 1][i - 1]) {
+                  heat += 1;
+                }
+
+                if (heat >= 5) {
+                  ctx.beginPath();
+                  ctx.rect(i * scl, index * scl, scl, scl);
+                  ctx.fill();
+                  ctx.closePath();
+                  map[index][i] = 1;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      generatemap();
+    </script>
+    <style>
+      canvas {
+        border: 3px black solid;
+      }
+    </style>
+  </body>
+</html>

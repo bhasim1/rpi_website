@@ -1,0 +1,1 @@
+sass -w ./styles/mainstyles.scss:style.css ./styles/private.scss:private.css

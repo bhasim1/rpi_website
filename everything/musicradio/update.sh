@@ -1,0 +1,3 @@
+#!/bin/sh
+yt-dlp -i -v --prefer-ffmpeg --merge-output-format "mp3" -f "mp3" --audio-quality 0 -o "%(uploader)s - %(title)s [%(id)s].%(ext)s" https://www.youtube.com/playlist?list=PLJcF2RfApUufBUG_C9LRAzQdjH_JtY8zu
+yt-dlp -i -v --prefer-ffmpeg --merge-output-format "mp3" -f "mp3" --audio-quality 0 -o "%(uploader)s - %(title)s [%(id)s].%(ext)s" https://www.youtube.com/playlist?list=PLJcF2RfApUudY7CgvTcl1PYKMri4jnc9_

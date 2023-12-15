@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+<style>
+    *{
+            box-sizing: border-box;
+    }
+    body {
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+    }
+    canvas {
+            border: 3px solid black;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+            background-color: rgb(199, 199, 199);
+            margin-top: 50px;
+    }
+    #score{
+        position: absolute;
+        top:0;
+        right: 0;
+        margin: 20px 20px 20px 20px;
+        font-size: 1.5rem;
+    }
+</style>
+<body>
+    <canvas></canvas>
+    <p id="score"></p>
+</body>
+<script defer>
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width  = 512 + 256///4;
+    ctx.canvas.height = 512 + 256//-100;
+
+    var cw = canvas.width
+    var ch = canvas.height
+        var scl = 32
+        var vector = 10
+        var row = canvas.width/scl
+        var columm = canvas.height/scl
+        var rainbowcolor = 0
+        var rainbowcolorball = rainbowcolor + 128
+        var circle
+        var up = false
+        var down = false
+        var left = false
+        var right = false
+        var x1 = row/2 * scl
+        var y1 = columm/2 * scl
+        var x2 = scl
+        var y2 = scl
+        var active = 0
+        var fruiteaten = false
+        var fruitposx = Math.floor(Math.random()* row)*scl
+        var fruitposy = Math.floor(Math.random()* columm)*scl
+        var score = 0
+        var length = 2
+        var fail = false
+
+        let tail = [ ]
+
+
+ 
+function fruit(){
+   ctx.beginPath()
+   ctx.fillStyle = "green";
+   ctx.moveTo(fruitposx, fruitposy)
+   ctx.lineTo(fruitposx, fruitposy + scl)
+   ctx.lineTo(fruitposx + scl, fruitposy+ scl)
+   ctx.lineTo(fruitposx + scl, fruitposy)
+   ctx.lineTo(fruitposx, fruitposy)
+   ctx.closePath()
+   ctx.fill()
+}
+
+function death(){
+    if(x1 + scl > cw || x1 < 0 || y1 + scl > ch || y1 < 0){
+    fail = true
+}
+
+for (let index = 0; index < tail.length; index++) {
+
+    if(JSON.stringify({x1: x1, y1: y1}) === JSON.stringify(tail[index]) && score > 0){
+    //fail = true
+}
+console.log(JSON.stringify({x1: x1, y1: y1}))
+console.log(JSON.stringify(tail[index]))
+}
+
+    if(fail === true){
+    x1 = row/2 * scl
+    y1 = columm/2 * scl
+    up = false
+    down = false
+    right = false
+    left = false
+    active = 0
+    tail = []
+    fail = false
+    score = 0
+}
+}
+
+
+document.onkeydown = checkKey;
+
+function checkKey(e) {
+if (e.keyCode == '38') {
+        active = 1
+    }
+    if (e.keyCode == '40') {
+        active = 2
+    }
+    if (e.keyCode == '37') {
+       active = 3
+    }
+    if (e.keyCode == '39') {
+       active = 4
+    }
+}
+
+function animate(){
+//check for death
+death()
+
+   if(active === 1){
+   y1 -= scl
+   }
+   if(active === 2){
+   y1 += scl
+   }
+   if(active === 3){
+   x1 -= scl
+   }
+   if(active === 4){
+   x1 += scl
+   }
+
+    ctx.beginPath();
+    ctx.fillStyle = "grey";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fill();
+    
+    ctx.strokeStyle = "black"
+    ctx.fillStyle = "blue";
+
+
+   //draw tail
+   for (let index = 0; index < tail.length; index++) {
+    ctx.rect(tail[index].x1,tail[index].y1,scl,scl)
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+   } 
+   //head
+   ctx.beginPath();
+   ctx.fillStyle = "white";
+    ctx.rect(x1,y1,x2,y2)
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+
+   //fruit eat
+   if(x1 === fruitposx && y1 === fruitposy){
+   fruitposx = Math.floor(Math.random()* row)*scl
+   fruitposy = Math.floor(Math.random()* columm)*scl
+   fruit()
+   score++
+   length++
+   }
+   //tail pos
+   tail.push({x1,y1})
+   if(tail.length > length){
+    tail.shift()
+   }
+
+
+   $("#score").text(`Score: ${score}`)
+   fruit()
+   rainbowcolor++;
+   setTimeout(animate, 250)
+};
+animate();
+</script>
+</html>

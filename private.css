@@ -1,0 +1,337 @@
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  font-size: 62.5%;
+  overflow-y: scroll;
+  scrollbar-color: hsl(109, 27%, 39%) rgb(41, 41, 41);
+}
+
+body {
+  background-color: rgb(80, 80, 80);
+  font-family: dosis;
+}
+
+:target {
+  outline: 3px solid hsl(307, 25%, 66%);
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+  scroll-padding-top: 70px;
+}
+
+*:focus-visible {
+  outline: none;
+}
+
+@font-face {
+  font-family: dosis;
+  src: url(dosis.ttf);
+}
+.dosis {
+  font-family: dosis;
+}
+
+p,
+label {
+  max-width: 60ch;
+  text-align: center;
+  font-size: 2rem;
+}
+
+a {
+  text-decoration: none;
+}
+
+input[type=text] {
+  margin: 0.25rem;
+  font-size: 2rem;
+}
+
+h1, h3,
+a.small, h2,
+a.big {
+  font-size: 7rem;
+  text-align: center;
+  color: hsl(109, 27%, 39%);
+  width: fit-content;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition-timing-function: linear;
+  transition: transform 0.5s, color 0.5s;
+  text-shadow: 4px, 4px, 4px black;
+}
+h1 :hover, h3 :hover,
+a.small :hover, h2 :hover,
+a.big :hover {
+  color: hsl(307, 25%, 66%);
+}
+
+h2,
+a.big {
+  font-size: 3rem;
+}
+h2 :hover,
+a.big :hover {
+  color: hsl(307, 25%, 66%);
+}
+
+h3,
+a.small {
+  font-size: 3rem;
+}
+h3 :hover,
+a.small :hover {
+  color: hsl(307, 25%, 66%);
+}
+
+li,
+p,
+textarea,
+ul {
+  overflow-wrap: break-word;
+}
+
+ul {
+  list-style-type: circle;
+}
+
+li {
+  font-size: 6rem;
+  color: hsl(109, 27%, 39%);
+  width: fit-content;
+  transition-timing-function: linear;
+  transition: transform 0.5s, color 0.5s;
+  text-shadow: 4px, 4px, 4px black;
+}
+li :hover {
+  color: hsl(307, 25%, 66%);
+}
+
+table {
+  font-size: 3rem;
+  padding: 0.25rem;
+  caption-side: bottom;
+  border-collapse: collapse;
+}
+
+/*classes*/
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  height: fit-content;
+  width: fit-content;
+}
+.grid-container div {
+  display: block;
+  height: fit-content;
+  width: fit-content;
+}
+
+.btn, .btn-primary {
+  cursor: pointer;
+  background-color: hsl(109, 27%, 39%);
+  border: 0.25rem solid black;
+  border-radius: 5px !important;
+  color: black;
+  font-size: 3rem;
+  border-radius: 0.1rem;
+  margin: 0.25rem;
+}
+
+.btn:hover, .btn-primary:hover {
+  transform: translateY(-0.1rem);
+  transform: scale(0.2rem, 0.2rem);
+  background-color: hsl(109, 56%, 56%) !important;
+}
+
+.btn-primary {
+  border-color: hsl(306, 50%, 35%) !important;
+  font-size: 5rem !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-0.1rem);
+  transform: scale(0.2rem, 0.2rem);
+  border-color: hsl(307, 25%, 66%) !important;
+}
+
+.left-align {
+  text-align: left;
+  padding-left: 0;
+}
+
+.flex-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.flex-container > div {
+  margin-left: 3rem;
+  margin-right: 3rem;
+}
+
+/*MASCOT STYLES*/
+.mascot {
+  position: absolute;
+  top: 55px;
+}
+@media (max-width: 675px) {
+  .mascot {
+    display: none !important;
+  }
+}
+
+.overlap {
+  width: 20px;
+  display: grid;
+  justify-items: start;
+  align-items: start;
+  transform: rotate(180deg);
+  margin-left: 800%;
+}
+
+.overlap > * {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+
+.overlap img {
+  width: 10vw;
+}
+
+.overlap #eye {
+  width: 25%;
+  height: 25%;
+}
+
+#navbar {
+  overflow: hidden;
+  z-index: 10;
+  height: 8rem;
+  background-color: rgb(41, 41, 41);
+  border-bottom: 3px solid hsl(307, 25%, 66%);
+}
+@media (max-width: 675px) {
+  #navbar {
+    height: fit-content !important;
+  }
+}
+#navbar a {
+  background-color: rgb(41, 41, 41);
+  float: left;
+  height: 6rem;
+  display: block;
+  color: hsl(109, 27%, 39%);
+  text-align: center;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  text-decoration: none;
+  font-size: 4rem;
+  transition-timing-function: linear;
+  transition: transform 0.5s, color 0.5s;
+  border-left: 3px solid hsl(306, 50%, 35%);
+  border-right: 3px solid hsl(306, 50%, 35%);
+  border-bottom: 3px solid hsl(306, 50%, 35%);
+}
+#navbar a:hover {
+  transform: scale(1.075);
+  color: hsl(307, 25%, 66%);
+}
+#navbar #icon {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 0.5rem;
+  align-items: center;
+}
+@media (max-width: 675px) {
+  #navbar #icon {
+    display: none !important;
+  }
+}
+#navbar #icon img {
+  height: 6rem;
+  margin: 1rem;
+  object-fit: contain;
+}
+
+.sticky {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+li {
+  font-size: 3rem;
+}
+
+canvas {
+  border: 3px solid black;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border-radius: 5px;
+}
+
+.flex-container > div {
+  max-width: 30vw;
+  min-width: 30vw;
+}
+
+#todo > ul {
+  background-color: rgb(41, 41, 41);
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.firsttodolist {
+  background-color: rgb(41, 41, 41) !important;
+  font-size: 8rem;
+}
+
+.list-group-item {
+  list-style-type: none;
+  padding: 0.1rem;
+  font-size: 3rem;
+}
+
+.list-group {
+  border: 0.25rem solid hsl(307, 25%, 66%);
+  border-radius: 5px;
+}
+
+.specialstuffasdf, .place {
+  text-align: center;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.changetodolist {
+  font-size: 5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+#out {
+  max-height: 20vh;
+}
+
+.timeset {
+  text-align: center;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  background-color: hsl(61, 74%, 59%);
+  font-size: 5rem;
+  text-align: center;
+  width: 40ch;
+  border: 3px solid rgb(41, 41, 41);
+  border-radius: 1rem;
+}
+
+/*# sourceMappingURL=private.css.map */

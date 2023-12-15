@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>offcanvasgame</title>
+    <style>
+       canvas {
+            border: 3px solid black;
+            display: block;
+            border-radius: 5px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: -6px;
+        }
+
+        *{
+            box-sizing: border-box;
+        }
+
+        body{
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<canvas></canvas>
+<script defer>
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext('2d');
+
+    ctx.canvas.width  = window.innerHeight - 10;
+    ctx.canvas.height = window.innerHeight - 10;
+
+    const cw = canvas.width
+    const ch = canvas.height
+
+    const projectile = []
+    const enemy = []
+
+    var x1
+    var y1
+    var x2 = 0
+    var y2 = 0 
+
+    var px = cw / 2
+    var py = ch / 2
+    var pradius = 30
+
+
+   
+
+    function animate(){
+        ctx.fillStyle = "hsla(100 , 20%,10%,0.3)"
+        ctx.fillRect(0,0,cw,ch)
+        projectileshoot()
+        player(px, py)
+        requestAnimationFrame(animate)
+    }
+
+    function player(x,y){
+        ctx.beginPath(); 
+        ctx.fillStyle = "hsla(64 , 50%,50%,1)"
+        ctx.arc(x, y, pradius, 0, Math.PI*2, false)
+        ctx.stroke()
+        ctx.fill()
+        ctx.closePath()
+    }
+
+    canvas.addEventListener("click", (e) => {
+        projectile.push([{x: e.offsetX, y: e.offsetY, vxpro: 0, vypro: 0}])
+    })
+
+    function projectileshoot(){
+        for (let index = 0; index < projectile.length; index++) {
+            ctx.beginPath(); 
+            ctx.fillStyle = "hsla(0 , 100%,50%,1)"
+            if(projectile[index][0].vxpro === 0){
+            projectile[index][0].vxpro = -(cw/2 - projectile[index][0].x)/20
+            projectile[index][0].vypro = -(ch/2 - projectile[index][0].y)/20
+            }
+            projectile[index][0].x = cw/2
+            projectile[index][0].y = ch/2
+            projectile[index][0].x = (projectile[index][0].x += projectile[index][0].vxpro)
+            projectile[index][0].y = (projectile[index][0].y += projectile[index][0].vypro)
+            console.log(projectile[index][0].x, projectile[index][0].y)
+            ctx.arc(projectile[index][0].x, projectile[index][0].y, 5, 0, Math.PI*2, false)
+            ctx.fill()
+        }
+    }
+    animate()
+    </script>
+</body>
+</html>

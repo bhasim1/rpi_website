@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+</head>
+<style>
+*{
+     box-sizing: border-box;
+}
+body {
+  perspective: 800px;
+}
+
+div {
+  width: 80px;
+  height: 80px;
+  background-color: skyblue;
+}
+
+.rotated {
+  transform: skew(0deg,0deg);
+  background-color: pink;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+</style>
+<body>
+    <div>Normal</div>
+    <div class="rotated">Rotated</div>
+</body>
+<script defer>
+const divrotate = document.querySelector(".rotated")
+var x
+var y
+var z
+var deg = 90
+var size = divrotate.getBoundingClientRect()
+
+divrotate.addEventListener("mousemove", (e) => {
+    x = e.offsetX
+    y = e.offsetY
+    //if(x > size.width/2){x = -x}
+    //if(y < size.height/2){y = -y}
+  //  deg= x / y 
+    divrotate.style.transform = `skew(${x/10}deg,${y/10}deg)`
+})
+
+divrotate.addEventListener("mouseleave", (e) => {
+    //divrotate.style.transform = `rotateX(0)`
+    //divrotate.style.transform = `rotateY(0)`
+})
+
+</script>
+</html>

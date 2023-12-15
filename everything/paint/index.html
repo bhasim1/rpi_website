@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paint</title>
+  </head>
+  <body>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Paint</title>
+      </head>
+      <style>
+        * {
+          box-sizing: border-box;
+        }
+        h1 {
+          text-align: left;
+          margin-left: 50px;
+        }
+        body {
+          margin: 0;
+          background-color: grey;
+          text-align: center;
+          overflow: hidden;
+        }
+
+        #toolbar {
+          margin-top: 5px;
+          padding: 5px;
+          background-color: rgb(255, 255, 255);
+          border: 3px solid black;
+          border-radius: 5px;
+          position: absolute;
+          top: 0;
+          right: 5px;
+          width: 85vw;
+          height: 7rem;
+        }
+
+        #toolbar button,
+        #toolbar p {
+          display: inline-block;
+          font-size: 1rem;
+          height: 4ch;
+        }
+
+        #toolbar button {
+          background-color: white;
+          border: 3px solid black;
+          border-radius: 5px;
+          padding: 2px;
+          margin: 2px;
+        }
+
+        button {
+          background-color: grey;
+        }
+
+        #hidden {
+          display: none;
+        }
+
+        canvas {
+          border: 3px solid black;
+          background-color: white;
+          padding-left: 0;
+          padding-right: 0;
+          margin-left: auto;
+          margin-right: auto;
+          display: block;
+          border-radius: 5px;
+        }
+
+        .around {
+          font-size: 1rem;
+          display: inline-block;
+          margin: 0.2rem;
+          padding: 0.5rem;
+          border: 3px solid black;
+          background-color: white;
+          border-radius: 5px;
+        }
+
+        #showtextsize {
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+      </style>
+      <body>
+        <h1>Paint with js</h1>
+        <div id="toolbar">
+          <div class="around">
+            <label for="color">color ></label>
+            <input type="color" name="color" id="color" value="#808080" />
+          </div>
+          <div class="around">
+            <label for="lw">size ></label>
+            <input type="range" id="lw" name="lw" min="1" max="100" />
+          </div>
+          <div class="around">
+            <label for="opacity">opacity ></label>
+            <input type="range" id="opacity" name="opacity" min="1" max="100" />
+          </div>
+          <div class="around">
+            <label for="crazy">crazy ></label>
+            <input type="checkbox" id="crazy" name="crazy" />
+            <br />
+          </div>
+          <div class="around">
+            <label for="text">text ></label>
+            <input type="text" id="text" name="text" />
+            <br />
+          </div>
+          <button onclick="main.usertoolselect('straightline')">
+            draw straight Line
+          </button>
+          <button onclick="main.usertoolselect('text')">text</button>
+          <button onclick="main.usertoolselect('drawbox')">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-bounding-box"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M5 2V0H0v5h2v6H0v5h5v-2h6v2h5v-5h-2V5h2V0h-5v2H5zm6 1v2h2v6h-2v2H5v-2H3V5h2V3h6zm1-2h3v3h-3V1zm3 11v3h-3v-3h3zM4 15H1v-3h3v3zM1 4V1h3v3H1z"
+              />
+            </svg>
+          </button>
+          <button onclick="main.usertoolselect('drawpen')">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-pencil"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"
+              />
+            </svg>
+          </button>
+          <button onclick="main.usertoolselect('drawcir')">
+            draw with Circle(bigger size)
+          </button>
+          <button onclick="main.clearcanvas()">clear</button>
+          <br />
+          <p>Curently drawing with</p>
+          <p id="drawingcur">nothing</p>
+        </div>
+
+        <div id="showtextsize"></div>
+
+        <canvas></canvas>
+        <form
+          method="post"
+          action="addtogallary.php"
+          enctype="multipart/form-data"
+          class="canvasupload"
+        >
+          <input name="uploadcanvasbase64" type="text" id="hidden" />
+          <input
+            name="uploadcanvasname"
+            type="text"
+            placeholder="name of the picture"
+            required
+          />
+          <input
+            type="submit"
+            name="submit"
+            class="submit btn-primary"
+            id="uploadcanvas"
+            value="upload canvas"
+          />
+        </form>
+      </body>
+      <script defer>
+        const canvas = document.querySelector("canvas");
+        const pcurout = document.querySelector("#drawingcur");
+        const lwinput = document.querySelector("#lw");
+        const colorinput = document.querySelector("#color");
+        const crazy = document.querySelector("#crazy");
+        const canvasuploadinput = document.querySelector("#hidden");
+        const opacityinput = document.getElementById("opacity");
+        const textinput = document.getElementById("text");
+        const showtextsize = document.getElementById("showtextsize");
+
+        const ctx = canvas.getContext("2d");
+        ctx.canvas.width = window.innerWidth - 100;
+        ctx.canvas.height = window.innerHeight - 150;
+        ctx.lineCap = "round";
+
+        const colorarray = [
+          "#ff0000",
+          "#ff7f00",
+          "#ffff00",
+          "#00ff00",
+          "#00ffff",
+          "#0000ff",
+          "#8b00ff",
+        ];
+        class Paint {
+          constructor() {
+            canvas.addEventListener("mousedown", (e) => {
+              e.preventDefault();
+              this.checkboxcrazy();
+              this.state.drawing = true;
+              this.x1 = parseFloat(e.offsetX);
+              this.y1 = parseFloat(e.offsetY);
+            });
+
+            canvas.addEventListener("mousemove", (e) => {
+              this.checkboxcrazy();
+              //when drawbox or straightline do not update cords
+
+              if (!this.state.drawbox && !this.state.straightline) {
+                this.x1 = parseFloat(e.offsetX);
+                this.y1 = parseFloat(e.offsetY);
+              }
+              if (this.state.drawing === true && this.state.drawpen === true) {
+                this.drawLine(this.x1, this.y1, e.offsetX, e.offsetY);
+              }
+              if (this.state.drawing === true && this.state.drawcir === true) {
+                this.drawcircle(this.x1, this.y1);
+              }
+              if (this.state.drawing === true && this.state.text === true) {
+                showtextsize.style.top = `${e.y + 5}px`;
+                showtextsize.style.left = `${e.x}px`;
+                showtextsize.style.fontSize = `${lwinput.value}px`;
+                showtextsize.innerHTML = textinput.value;
+              }
+            });
+
+            canvas.addEventListener("mouseup", (e) => {
+              e.preventDefault();
+              this.history.push(canvas.toDataURL());
+              this.x2 = parseFloat(e.offsetX);
+              this.y2 = parseFloat(e.offsetY);
+              canvasuploadinput.value = canvas.toDataURL();
+
+              if (this.state.drawing === true && this.state.drawbox === true) {
+                ctx.beginPath();
+                ctx.lineWidth = lwinput.value;
+                ctx.strokeStyle = color;
+                ctx.moveTo(this.x1, this.y1);
+                ctx.lineTo(this.x1, this.y2);
+                ctx.lineTo(this.x2, this.y2);
+                ctx.lineTo(this.x2, this.y1);
+                ctx.lineTo(this.x1, this.y1);
+                ctx.closePath();
+                ctx.stroke();
+              }
+              if (
+                this.state.drawing === true &&
+                this.state.straightline === true
+              ) {
+                ctx.beginPath();
+                ctx.lineWidth = lwinput.value;
+                ctx.strokeStyle = this.color;
+                console.log(this.x1, this.y1);
+                console.log(this.x2, this.y2);
+                ctx.moveTo(this.x1, this.y1);
+                ctx.lineTo(this.x2, this.y2);
+                ctx.stroke();
+                ctx.closePath();
+              }
+              if (this.state.drawing === true && this.state.text === true) {
+                showtextsize.style.fontSize = `0px`;
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = this.color;
+                ctx.font = `${lwinput.value}px serif`;
+                ctx.fillText(
+                  textinput.value,
+                  this.x2,
+                  this.y2 + parseFloat(lwinput.value) - 1
+                );
+                ctx.stroke();
+                this.state.text = false;
+              }
+              this.state.drawing = false;
+            });
+
+            this.history = [];
+            this.x1;
+            this.y1;
+            this.x2;
+            this.y2;
+
+            this.colorfull = false;
+            this.currentllyusing = null;
+            this.color = colorinput.value;
+            this.state = {
+              drawing: false,
+
+              drawbox: false,
+              drawpen: false,
+              drawcir: false,
+              straightline: false,
+              text: false,
+            };
+
+            colorinput.addEventListener("input", (e) => {
+              this.color = colorinput.value;
+            });
+
+            crazy.addEventListener("input", (e) => {
+              this.color = colorinput.value;
+            });
+          }
+
+          drawLine(x1, y1, xp2, yp2) {
+            ctx.beginPath();
+            ctx.lineWidth = lwinput.value;
+            ctx.strokeStyle = this.color;
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(xp2, yp2);
+            ctx.stroke();
+            ctx.closePath();
+          }
+
+          drawcircle(x1, y1) {
+            ctx.beginPath();
+            ctx.strokeStyle = this.color;
+            ctx.fillStyle = this.color;
+            ctx.arc(this.x1, this.y1, lwinput.value / 2, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.stroke();
+          }
+
+          resettool() {
+            Object.entries(this.state).forEach(
+              ([key, value]) => (this.state[key] = false)
+            );
+          }
+
+          changestate() {
+            pcurout.textContent = this.currentllyusing;
+          }
+
+          checkboxcrazy() {
+            if (crazy.checked === true) {
+              this.color = colorarray[Math.floor(Math.random() * 7)];
+            }
+          }
+
+          clearcanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+
+          usertoolselect(key) {
+            this.resettool();
+            this.state[key] = true;
+            this.currentllyusing = key;
+            this.changestate();
+          }
+        }
+
+        const main = new Paint();
+
+        //mouse down
+
+        //mouse move
+
+        //mouse up
+      </script>
+    </html>
+  </body>
+</html>

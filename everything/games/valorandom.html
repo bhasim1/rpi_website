@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Valorant-random</title>
+  </head>
+
+  <body>
+    <img
+      id="imgheader"
+      src="https://upload.wikimedia.org/wikipedia/commons/4/44/Valorant_logo.svg"
+    /><br />
+    <div class="centerbtn">
+      <button class="btn" onclick="random()">Randomize</button>
+      <div class="center">
+        <label for="togglemap">togglemap (OFF = with map)</label
+        ><input type="checkbox" name="togglemap" />
+      </div>
+      <div class="flexcon">
+        <h2 id="gun">XXX</h2>
+        <h2 id="gun2">XXX</h2>
+        <h2 id="agent">XXX</h2>
+        <h2 id="map">XXX</h2>
+      </div>
+      <button id="copybtn" class="btn">Copy result</button>
+      <img id="mapimg" />
+    </div>
+  </body>
+  <script>
+    const gun = [
+      "stinger",
+      "spectre",
+      "bucky",
+      "judge",
+      "bulldog",
+      "guardien",
+      "phantom",
+      "vandal",
+      "marshal",
+      "operator",
+      "ares",
+      "odin",
+    ];
+    const gun2 = ["knife", "classic", "shorty", "frenzy", "ghost", "sheriff"];
+    const agent = [
+      "astra",
+      "breach",
+      "brimstone",
+      "cypher",
+      "phoenix",
+      "raze",
+      "reyna",
+      "sage",
+      "sova",
+      "chamber",
+      "harbor",
+      "kay/O",
+      "neon",
+      "skye",
+      "viper",
+      "yoru",
+      "fade",
+      "jett",
+      "killjoy",
+      "omen",
+    ];
+    const map = [
+      "ascent",
+      "haven",
+      "fracture",
+      "bind",
+      "breeze",
+      "icebox",
+      "split",
+      "pearl",
+    ];
+    const mapimg = [
+      "https://mobalytics.gg/wp-content/uploads/2020/04/ascent.jpg",
+      "https://cdnportal.mobalytics.gg/production/2020/04/haven_callouts.jpg",
+      "https://cdnportal.mobalytics.gg/production/2021/09/7fdd8774-fracture-mobalytics-map.png",
+      "https://cdnportal.mobalytics.gg/production/2020/04/bind_map_callouts.jpg",
+      "https://cdnportal.mobalytics.gg/production/2021/05/ea82cc2d-valorant-breeze-map-article-version.jpg",
+      "https://storage.googleapis.com/usc-main-portal/production/2020/06/709cca30-icebox_callouts.jpg",
+      "https://cdnportal.mobalytics.gg/production/2020/04/split_callouts.jpg",
+      "https://cdnportal.mobalytics.gg/production/2022/06/c54efada-pearl-first-impressions-and-how-to-play.jpg",
+    ];
+
+    function random() {
+      document.querySelector("#gun").textContent =
+        gun[Math.floor(Math.random() * gun.length)];
+
+      document.querySelector("#gun2").textContent =
+        gun2[Math.floor(Math.random() * gun2.length)];
+
+      document.querySelector("#agent").textContent =
+        agent[Math.floor(Math.random() * agent.length)];
+
+      if (!document.querySelector("[type='checkbox']").checked) {
+        document.querySelector("#map").style.display = "";
+        document.querySelector("#mapimg").style.display = "";
+        let rmap = Math.floor(Math.random() * map.length);
+        document.querySelector("#map").textContent = map[rmap];
+        document.querySelector("#mapimg").src = mapimg[rmap];
+      }
+    }
+
+    document
+      .querySelector("[type='checkbox']")
+      .addEventListener("click", () => {
+        if (!document.querySelector("[type='checkbox']").checked) {
+          document.querySelector("#map").style.display = "";
+          document.querySelector("#mapimg").style.display = "";
+        } else {
+          document.querySelector("#map").style.display = "none";
+          document.querySelector("#mapimg").style.display = "none";
+        }
+      });
+
+    if (!document.querySelector("[type='checkbox']").checked) {
+      document.querySelector("#map").style.display = "";
+      document.querySelector("#mapimg").style.display = "";
+    } else {
+      document.querySelector("#map").style.display = "none";
+      document.querySelector("#mapimg").style.display = "none";
+    }
+
+    document.querySelector("#copybtn").addEventListener("click", (e) => {
+      const all = [];
+      document.querySelectorAll("h2").forEach((ele) => {
+        if (ele.style.display != "none" && ele.textContent != "XXX") {
+          all.push(ele.textContent);
+        }
+      });
+      if (all.length != 0) {
+        navigator.clipboard.writeText(all.join(" / "));
+      }
+    });
+  </script>
+  <style>
+    body {
+      overflow: hidden;
+      background-color: #272727;
+    }
+
+    .flexcon {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 70vw;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+    }
+    .centerbtn button {
+      margin: 0 auto;
+    }
+
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn {
+      margin: 0.5rem;
+      cursor: pointer;
+      font-size: 3rem;
+      box-shadow: 6px 6px 4px #030303;
+      text-align: center;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #181818;
+      color: white;
+      border: black 3px solid;
+      border-radius: 1rem;
+      transition: all 200ms;
+    }
+    .btn:hover {
+      background-color: #dadada;
+      color: rgb(0, 0, 0);
+      transform: scale(1.1);
+    }
+
+    #imgheader {
+      width: 30%;
+      min-width: 600px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #mapimg {
+      width: 25%;
+      height: 25%;
+      min-width: 300px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h2,
+    label {
+      cursor: default;
+      box-shadow: 6px 6px 4px #030303;
+      padding: 0.25rem;
+      margin: 0.5rem;
+      text-align: center;
+      font-size: 2rem;
+      background-color: #181818;
+      color: white;
+      border: black 3px solid;
+      border-radius: 1rem;
+      transition: all 200ms;
+      width: fit-content;
+    }
+    h2::first-letter {
+      text-transform: capitalize;
+    }
+    h2:hover {
+      background-color: #dadada;
+      color: rgb(0, 0, 0);
+      transform: scale(1.1);
+    }
+
+    #return {
+      position: absolute;
+      top: 3%;
+      right: 3%;
+      padding: 0;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 32px;
+    }
+  </style>
+</html>

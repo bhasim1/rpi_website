@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>cool</title>
+</head>
+<style>
+    *{
+            box-sizing: border-box;
+    }
+    body {
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+    }
+    canvas {
+            border: 3px solid black;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border-radius: 5px;
+            margin-top: calc(12.5vh - 3px);
+    }
+</style>
+<body>
+    <canvas></canvas>
+    <input type="range" name="" id="" min="1" max="100" value="1" oninput="drawfibonacci">
+    <button onclick="drawfibonacci()">redraw</button>
+</body>
+<script defer>
+    const scale = document.querySelector("input[type=range]")
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width  = window.innerHeight/4*3
+    ctx.canvas.height = window.innerHeight/4*3
+
+    var cw = canvas.width
+    var ch = canvas.height
+
+
+
+        var x1 
+        var y1 
+        var x2
+        var y2
+
+        let orx = 1
+        let ory = 1
+
+        let rainbow = 1
+
+        let rotation = 1
+
+    const fibonaciarray = [0, 1]
+    let length = 15
+
+ctx.translate(cw/2, ch/2)
+
+
+
+
+function fibonaci(index){
+var result = fibonaciarray[fibonaciarray.length - 1] + fibonaciarray[fibonaciarray.length - 2]
+fibonaciarray.push(result)
+}
+for (let index = 0; index < length; index++) {
+    fibonaci(index)
+}
+
+function drawfibonacci(){
+
+    ctx.fillStyle = `hsl(128,100%,50%)`
+    ctx.fillRect(-cw, -ch,2*cw,2*ch)
+
+
+for (const key in fibonaciarray) {
+
+switch (rotation){
+    case 1:
+        orx = 1
+        ory = 1
+        rotation++
+        break;
+    case 2:
+        orx = -1
+        ory = 1
+        rotation++
+        break;
+    case 3:
+        orx = -1
+        ory = -1
+        rotation++
+        break;
+    case 4:
+        orx = 1
+        ory = -1
+        rotation++
+        break;
+}
+if(rotation === 5){rotation = 1}
+
+ctx.beginPath()
+ctx.rect(0,0,fibonaciarray[key] * orx / (scale.value/10),fibonaciarray[key]*ory / (scale.value/10))
+ctx.stroke()
+ctx.closePath()
+console.log(fibonaciarray[key] * orx,fibonaciarray[key]*ory)
+}}
+
+scale.addEventListener("input", drawfibonacci())
+
+</script>
+</html>
