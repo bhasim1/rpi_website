@@ -3,6 +3,7 @@
   <head>
     <title>Bhasim</title>
     <link rel="stylesheet" href="../../private.css" />
+    <link rel="stylesheet" href="custom.css" />
     <!-- <link rel="stylesheet" href="../style.css"> -->
     <link
       rel="icon"
@@ -17,136 +18,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <script type="text/javascript" src="index.js" defer></script>
+    <script type="text/javascript" src="matrix.js" defer></script>
+    <script type="text/javascript" src="weather.js" defer></script>
     <style>
-      * {
-        scrollbar-width: none;
-        box-sizing: border-box !important;
-      }
-      .grid-container {
-        width: 100vw;
-        height: 100vh;
-        grid-gap: 1rem;
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr;
-        grid-template-areas:
-          "Wetter   News News"
-          "krawatte News News"
-          "Matrix   y    w   ";
-      }
-      .grid-container div {
-        border: 3px solid black;
-        border-radius: 5px;
-      }
-      .main,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      .main > div {
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      .weather {
-        grid-area: Wetter;
-      }
-      .weather h2 {
-        display: inline-block;
-        margin: 0.5rem;
-      }
-      .weather .grid-container {
-        grid-template-areas:
-          "temp humi"
-          "des des";
-        border: 0;
-        justify-content: space-evenly;
-        align-content: center;
-      }
-
-      .matrix {
-        grid-area: Matrix;
-      }
-      canvas {
-        border: 0 !important;
-        border-radius: 0 !important;
-      }
-
-      .weather .grid-container div,
-      .news div {
-        border: 0 !important;
-      }
-      #description-img {
-        width: 6rem;
-        margin: 1rem;
-        position: relative;
-        top: 1rem;
-      }
-
-      .news {
-        grid-area: News;
-        display: grid !important;
-        grid-template-columns: auto auto;
-        
-      }
-      .news > div {
-        max-width: 35vw;
-        display: grid;
-        margin: 0.5rem;
-        grid-template-columns: repeat(3, 1fr);
-        width: 100%;
-        justify-items: center;
-        align-content: space-around;
-        /* https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout/Box_alignment_in_grid_layout */
-        /* border: 3px solid black;
-        border-radius: 5px; */
-      }
-      .news > div * {
-        font-size: 2rem;
-        margin: 0.2rem;
-      }
-      .news div h2 {
-        max-width: 100%;
-      }
-      .news p {
-        /* font-size: 1.5rem; */
-        border: 0;
-      }
-      #news-img {
-        max-width: 12rem;
-      }
-      .krawatte {
-        background-color: white;
-        grid-area: krawatte;
-      }
-      .krawatte img {
-        max-height: 30vh;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      @keyframes hide {
-        from {
-          opacity: 1;
-        }
-        to {
-          opacity: 0;
-        }
-      }
-      @keyframes show {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-      .hide {
-        animation: hide 1s ease 0s 1 both;
-      }
-      .show {
-        animation: show 1s ease 0s 1 both;
-      }
+     
     </style>
   </head>
 
