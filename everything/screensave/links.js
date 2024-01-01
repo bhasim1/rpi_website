@@ -1,17 +1,18 @@
-
-const links = ["google.com", "youtube.com", "pwg-wittlich.de", "192.168.1.10", "tagesschau.de"];
-let user_links = []
+let links = [
+  "google.com",
+  "youtube.com",
+  "pwg-wittlich.de",
+  "192.168.1.10",
+  "tagesschau.de",
+];
+let user_links = [];
 try {
-  user_links = JSON.parse(window.localStorage.getItem("user_links"))
+  user_links = JSON.parse(window.localStorage.getItem("user_links"));
 } catch (error) {
-  user_links = []
+  user_links = [];
 }
 
-console.log(user_links)
-
-links.concat(user_links)
-
-
+links = links.concat(user_links);
 
 function get_favicon_img(link) {
   const img = document.createElement("img");
@@ -29,13 +30,12 @@ const link_div = document.querySelector(".links");
 links.forEach((x, inx) => {
   const div = document.createElement("div");
   const text = document.createElement("a");
-  text.textContent = x
-  text.href = x
-  text.classList.add("big")
+  text.textContent = x;
+  text.href = x;
+  text.classList.add("big");
   div.appendChild(get_favicon_img(links[inx]));
   div.appendChild(text);
 
-
-  link_div.appendChild(div)
+  link_div.appendChild(div);
   console.log(link_div);
 });

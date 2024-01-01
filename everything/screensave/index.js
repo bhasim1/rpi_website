@@ -53,4 +53,16 @@ class Key_watcher {
   }
 }
 
-new Key_watcher();
+const Keywatcher = new Key_watcher([
+  [
+    ["e", "l"],
+    () => {
+      let user_input = prompt(
+        "links to be displayed as JSON array",
+        window.localStorage.getItem("user_links")
+      );
+      user_input ??= "[]"
+      window.localStorage.setItem("user_links", user_input)
+    },
+  ],
+]);
