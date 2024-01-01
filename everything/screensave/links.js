@@ -1,10 +1,3 @@
-let links = [
-  "google.com",
-  "youtube.com",
-  "pwg-wittlich.de",
-  "192.168.1.10",
-  "tagesschau.de",
-];
 let user_links = [];
 try {
   user_links = JSON.parse(window.localStorage.getItem("user_links"));
@@ -12,7 +5,7 @@ try {
   user_links = [];
 }
 
-links = links.concat(user_links);
+links = user_links
 
 function get_favicon_img(link) {
   const img = document.createElement("img");
