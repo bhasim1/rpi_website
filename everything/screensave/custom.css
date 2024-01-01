@@ -9,9 +9,9 @@
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
     grid-template-areas:
-      "Wetter   News News"
-      "krawatte News News"
-      "Matrix   y    w   ";
+      "Wetter News News"
+      "Matrix News News"
+      "link   y    w   ";
   }
   .grid-container div {
     border: 3px solid black;
@@ -26,7 +26,26 @@
     width: 100% !important;
     height: 100% !important;
   }
-
+  .links {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-direction: column;
+    align-content: space-around;
+  }
+  .links > div {
+    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    border: 0;
+    width: 100%;
+  }
+  .links > div * {
+    display: inline-block;
+    margin: 0.5rem;
+  }
   .weather {
     grid-area: Wetter;
   }
@@ -94,7 +113,7 @@
   #news-img {
     max-width: 12rem;
   }
-  .krawatte {
+  /* .krawatte {
     background-color: white;
     grid-area: krawatte;
   }
@@ -103,7 +122,7 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-  }
+  } */
 
   @keyframes hide {
     from {
