@@ -1,106 +1,163 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>cool</title>
-</head>
-<style>
-    *{
-            box-sizing: border-box;
+  </head>
+  <style>
+    * {
+      box-sizing: border-box;
     }
     body {
-            margin: 0;
-            text-align: center;
-            overflow: hidden;
+      margin: 0;
+      text-align: center;
+      overflow: hidden;
     }
     canvas {
-            border: 3px solid black;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            border-radius: 5px;
-            background-color: rgb(199, 199, 199);
-           /* margin-top: 50px;*/
+      border: 3px solid black;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+      border-radius: 5px;
+      background-color: rgb(199, 199, 199);
+      /* margin-top: 50px;*/
     }
-</style>
-<body>
+  </style>
+  <body>
     <canvas></canvas>
     <button onclick="rload()">Reload</button>
-</body>
-<script defer>
-    function rload(){
-        location.reload() 
-}
+  </body>
+  <script defer>
+    function rload() {
+      location.reload();
+    }
+
     const canvas = document.querySelector("canvas");
-    const ctx = canvas.getContext('2d');
-    ctx.canvas.width  = window.innerWidth - 6///4;
-    ctx.canvas.height = window.innerHeight - 6//-100;
+    const ctx = canvas.getContext("2d");
+    ctx.canvas.width = window.innerWidth - 6; ///4;
+    ctx.canvas.height = window.innerHeight - 6; //-100;
 
-    var cw = canvas.width
-    var ch = canvas.height
+    var cw = canvas.width;
+    var ch = canvas.height;
 
-        var x = Math.floor(Math.random() * cw) 
-        var y = Math.floor(Math.random() * ch)
-        while(x + radius> canvas.width || x - radius < canvas.width){
-            x = Math.floor(Math.random() * cw)
-        }
-        while(y + radius > canvas.height || y - radius < canvas.height){
-            y = Math.floor(Math.random() * ch)
-        }
+    const extra_space = 200;
+    const speed = 2;
+    const circles = [];
 
-        var x1 
-        var y1 
-        var x2
-        var y2
-        var radius = Math.floor(Math.random() * 30) + 60;
-        var vx = Math.floor(Math.random()* 20 - 10 ) * 4;
-        var vy = Math.floor(Math.random()* 20 - 10 ) * 4;
-        var rainbowcolor = 0
-        var rainbowcolorball = rainbowcolor + 128
-        var circle
-
-        ctx.canvas.width  = window.innerWidth - 6///4;
-        ctx.canvas.height = window.innerHeight - 6//-100;
-
-        const saveway = []
-
-        class ball{
-            constructor(x, y, radius, color){
-                this.x = x
-                this.y = y
-                this.radius = radius
-                this.color = color
-            }
-            draw(){
-                ctx.fillStyle = this.color
-                ctx.arc(this.x, this.y, this.radius, Math.PI * 2, false)
-            }
-        }
-
- 
-function animate(){
-    x += vx
-    y += vy
-    requestAnimationFrame(animate);
-    ctx.beginPath();
-    ctx.fillStyle = `hsla(${rainbowcolor} , 50%, 50%, 0.2)`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fill();
-    ctx.closePath()
-    circle = new ball(x, y, radius, 'hsla(' + rainbowcolorball + ' , 50%, 50%, 1)')
-    circle.draw()
-    ctx.fill()
-    ctx.closePath()
-    rainbowcolor++;
-    rainbowcolorball++;
-    if(x + radius > canvas.width || x - radius < 0){
-        vx = -vx;
+    ctx.canvas.width = window.innerWidth - 6; ///4;
+    ctx.canvas.height = window.innerHeight - 6; //-100;
+    ctx.lineWidth = 5;
+    const saveway = [];
+    function uuidv4() {
+      return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+        (
+          c ^
+          (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+        ).toString(16)
+      );
     }
-    if(y + radius > canvas.height || y - radius < 0){
-        vy = -vy;
+    class ball {
+      constructor(uuid, x, y, vx, vy, radius, color) {
+        this.uuid = uuid;
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.radius = radius;
+        this.color = color;
+      }
+      gradientconnect(x1, y1, c1, x2, y2, c2) {
+        ctx.beginPath();
+        let gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+        gradient.addColorStop(0, c1);
+        gradient.addColorStop(1, c2);
+        ctx.strokeStyle = gradient;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke()
+        ctx.closePath();
+      }
+      connections() {
+        for (let index = 0; index < circles.length; index++) {
+          const element = circles[index];
+          if (
+            Math.sqrt((this.x - element.x) ** 2 + (this.y - element.y) ** 2) <
+            300 // näher als 150 pixel diagonal
+            && this.uuid != element.uuid
+          ) {
+            console.log(
+              this.x,
+              this.y,
+              this.color,
+              element.x,
+              element.y,
+              element.color
+            );
+            this.gradientconnect(
+              this.x,
+              this.y,
+              this.color,
+              element.x,
+              element.y,
+              element.color
+            );
+          }
+        }
+      }
+      draw() {
+        this.connections();
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.radius, Math.PI * 2, false);
+        ctx.fill();
+        ctx.closePath();
+      }
+      update() {
+        if (
+          this.x + this.radius - extra_space > canvas.width ||
+          this.x - this.radius + extra_space < 0
+        ) {
+          this.vx = -this.vx;
+        }
+        if (
+          this.y + this.radius - extra_space > canvas.height ||
+          this.y - this.radius + extra_space < 0
+        ) {
+          this.vy = -this.vy;
+        }
+        this.x += this.vx;
+        this.y += this.vy;
+      }
     }
-    
-}
-animate()
-</script>
+
+    function init() {
+      for (let index = 0; index < 20; index++) {
+        circles.push(
+          new ball(
+            uuidv4(),
+            Math.floor(Math.random() * cw),
+            Math.floor(Math.random() * ch),
+            Math.floor(Math.random() * 20 - 10) * speed,
+            Math.floor(Math.random() * 20 - 10) * speed,
+            Math.floor(Math.random() * 20) + 20,
+            "hsla(" + Math.floor(Math.random() * 360) + " , 50%, 50%, 1)"
+          )
+        );
+      }
+    }
+    // Math.floor(Math.random() * 255)
+    init();
+    function animate() {
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${0} , 0%, 0%, 0.3)`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.closePath();
+
+      for (const circle of circles) {
+        circle.update();
+        circle.draw();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
 </html>
