@@ -2,6 +2,24 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function uuidv4() {
+  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+}
+function rand(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function get_random_color() {
+  var h = rand(1, 360);
+  var s = rand(20, 80);
+  var l = rand(40, 90);
+  return "hsl(" + h + "," + s + "%," + l + "%)";
+}
 class Key_watcher {
   /**
    *
@@ -61,8 +79,21 @@ const Keywatcher = new Key_watcher([
         "links to be displayed as JSON array",
         window.localStorage.getItem("user_links")
       );
-      user_input ??= "[]"
-      window.localStorage.setItem("user_links", user_input)
+      user_input ??= "[]";
+      window.localStorage.setItem("user_links", user_input);
+      window.location.replace(location);
+    },
+  ],
+  [
+    ["e", "w"],
+    () => {
+      let user_input = prompt(
+        "weather location ('Stadt, Land')",
+        window.localStorage.getItem("weather_location")
+      );
+      user_input ??= "berlin";
+      window.localStorage.setItem("weather_location", user_input);
+      window.location.replace(location);
     },
   ],
 ]);

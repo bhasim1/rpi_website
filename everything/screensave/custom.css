@@ -10,7 +10,7 @@
   grid-template-rows: 1fr 1fr 1fr;
   grid-template-areas:
     "Wetter News News"
-    "Matrix News News"
+    "game News News"
     "link   y    w   ";
 }
 .grid-container div {
@@ -61,8 +61,8 @@ body {
   align-content: center;
 }
 
-.matrix {
-  grid-area: Matrix;
+.game {
+  grid-area: game;
 }
 canvas {
   border: 0 !important;
